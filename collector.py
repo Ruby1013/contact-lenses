@@ -19,7 +19,7 @@ from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).parent
-PRODUCTS_FILE = ROOT / "products.json"
+PRODUCTS_FILE = ROOT / "public" / "products.json"
 USER_AGENT = "ContactLensPriceComparer/0.1 (+personal research; public pages only)"
 
 SOURCES = {

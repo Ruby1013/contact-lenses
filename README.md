@@ -9,14 +9,14 @@
 不需要安裝套件：
 
 ```bash
-python -m http.server 8000
+python -m http.server 8000 --directory public
 ```
 
 瀏覽器開啟 `http://localhost:8000`。
 
 ## 部署到 Render
 
-在 Render 建立 **Static Site**，連結 GitHub 的 `Ruby1013/contact-lenses`，分支選 `main`。專案已附上 `render.yaml`：部署時會建立 `public` 目錄並放入靜態網站檔案，不需要安裝套件。
+在 Render 建立 **Static Site**，連結 GitHub 的 `Ruby1013/contact-lenses`，分支選 `main`。專案已附上 `render.yaml`；Render 會直接發布已提交的 `public` 目錄，不需要安裝套件。
 
 ## 加入或更新商品
 
