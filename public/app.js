@@ -64,9 +64,7 @@ function appendProductCard(root, product, rank) {
 }
 
 function render() {
-  $('comparison').hidden = !selectedBrand;
-  $('landing-message').hidden = Boolean(selectedBrand);
-  if (!selectedBrand) return;
+  $('comparison').hidden = false;
   const query = $('search').value.trim().toLowerCase();
   const source = $('source').value;
   const field = $('sort').value;
@@ -75,10 +73,12 @@ function render() {
     targetBrand(p) && (!selectedBrand || targetBrand(p)?.name === selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
   const groups = groupForRanking(filtered);
-  const title = `${selectedBrand} 熱門基本款・最便宜前三名`;
+  const title = selectedBrand ? `${selectedBrand} 熱門基本款・最便宜前三名` : '熱門基本款・同規格每片成本排序';
   $('comparison-title').textContent = title;
-  $('comparison-kicker').textContent = `${selectedBrand.toUpperCase()} · PRICE COMPARISON`;
-  $('comparison-description').textContent = '每個品項依同系列、同規格與相同促銷門檻比價；排名以每片成本計算，點「查看商品」可回原官網確認。';
+  $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
+  $('comparison-description').textContent = selectedBrand
+    ? '每個品項依同系列、同規格與相同促銷門檻比價；排名以每片成本計算，點「查看商品」可回原官網確認。'
+    : '先從九宮格選品牌可縮小結果；下方則保留所有已收錄熱門基本款的同規格價格排序。';
   $('summary').textContent = `已整理 ${groups.length} 款基本品項、${filtered.length} 筆公開價格資料${selectedBrand ? `（${selectedBrand}）` : ''}`;
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
