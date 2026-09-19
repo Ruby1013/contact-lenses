@@ -44,7 +44,15 @@ function groupForRanking(records) {
     groups.get(key).products.push(product);
   });
   return [...groups.values()]
-    .map(group => ({ ...group, products: group.products.sort((a, b) => (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity)) }))
+    .map(group => {
+      const sorted = group.products.sort((a, b) => (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity));
+      const sources = new Set();
+      return { ...group, products: sorted.filter(product => {
+        if (sources.has(product.source)) return false;
+        sources.add(product.source);
+        return true;
+      }) };
+    })
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
 }
 
