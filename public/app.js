@@ -1,7 +1,6 @@
 const money = new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
 let products = [];
 let targetBrands = [];
-let commonProducts = [];
 let selectedBrand = null;
 const $ = (id) => document.getElementById(id);
 
@@ -12,7 +11,7 @@ function targetBrand(product) {
 
 function renderBrandGrid() {
   const grid = $('brand-grid'); grid.innerHTML = '';
-  targetBrands.forEach(brand => {
+  targetBrands.filter(brand => products.some(product => targetBrand(product)?.name === brand.name)).forEach(brand => {
     const button = document.createElement('button');
     button.type = 'button'; button.className = `brand-button${selectedBrand === brand.name ? ' active' : ''}`;
     button.innerHTML = `<span>${brand.name}</span><small>查看價格</small>`;
@@ -63,23 +62,6 @@ function appendProductCard(root, product, rank) {
   root.append(card);
 }
 
-function renderSharedProducts() {
-  const visible = commonProducts.filter(item => !selectedBrand || item.brand === selectedBrand);
-  $('shared-title').textContent = selectedBrand ? `${selectedBrand}・三站共同販售品項` : '三站共同販售品項';
-  $('shared-description').textContent = visible.length
-    ? `目前確認 ${visible.length} 項：鏡后、睛美與 BBLens 的公開商品目錄皆有列出。`
-    : selectedBrand
-      ? `${selectedBrand} 目前未出現在三站共同清單；BBLens 的公開總覽未列出此品牌商品。`
-      : '僅列出鏡后、睛美與 BBLens 的公開商品目錄都出現的同系列、同規格品項。';
-  const root = $('shared-list'); root.innerHTML = '';
-  visible.forEach(item => {
-    const card = $('shared-template').content.cloneNode(true);
-    card.querySelector('h3').textContent = item.product;
-    card.querySelector('p').textContent = item.spec;
-    root.append(card);
-  });
-}
-
 function render() {
   const query = $('search').value.trim().toLowerCase();
   const source = $('source').value;
@@ -89,22 +71,21 @@ function render() {
     targetBrand(p) && (!selectedBrand || targetBrand(p)?.name === selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
   const groups = groupForRanking(filtered);
-  renderSharedProducts();
-  const title = selectedBrand ? `${selectedBrand} 各品項前三低價` : '九大品牌各品項前三低價';
+  const title = selectedBrand ? `${selectedBrand} 基本款每片價格前三名` : '基本款每片價格前三名';
   $('comparison-title').textContent = title;
   $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
   $('comparison-description').textContent = selectedBrand
     ? `每個品項只比較同系列、同片數與相同促銷門檻的資料；依每片成本列出前三低價。`
-    : '點選上方品牌後，查看每個可對齊品項在各個來源網站的前三低價。';
-  $('summary').textContent = `已整理 ${groups.length} 個可比較品項、${filtered.length} 筆公開價格資料${selectedBrand ? `（${selectedBrand}）` : '（九大品牌）'}`;
+    : '共挑選 6 款常見透明日拋，直接比較鏡后、睛美與 BBLens 的公開價格。';
+  $('summary').textContent = `已整理 ${groups.length} 款基本品項、${filtered.length} 筆公開價格資料${selectedBrand ? `（${selectedBrand}）` : ''}`;
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
   groups.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
-    section.querySelector('.comparison-name').textContent = '同規格比價';
+    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
     section.querySelector('h3').textContent = group.name;
     section.querySelector('.coverage').textContent = group.products.length >= 3
-      ? `已收錄 ${group.products.length} 家・顯示前三名`
+      ? `三個官網・顯示前三名`
       : `目前僅收錄 ${group.products.length} 家`;
     const rankings = section.querySelector('.rankings');
     group.products.slice(0, 3).forEach((product, index) => appendProductCard(rankings, product, index + 1));
@@ -112,8 +93,8 @@ function render() {
   });
 }
 
-Promise.all([fetch('products.json').then(response => response.json()), fetch('target_brands.json').then(response => response.json()), fetch('common-products.json').then(response => response.json())]).then(([data, brands, common]) => {
-  products = data; targetBrands = brands; commonProducts = common;
+Promise.all([fetch('products.json').then(response => response.json()), fetch('target_brands.json').then(response => response.json())]).then(([data, brands]) => {
+  products = data; targetBrands = brands;
   const requested = decodeURIComponent(window.location.hash.slice(1));
   if (targetBrands.some(brand => brand.name === requested)) selectedBrand = requested;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));

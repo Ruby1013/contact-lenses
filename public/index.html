@@ -14,16 +14,11 @@
   </header>
   <main>
     <section class="brand-picker" aria-label="選擇要比較的品牌">
-      <div class="section-heading"><div><p class="eyebrow">CHOOSE A BRAND</p><h2>選擇品牌</h2></div><button id="clear-brand" class="text-button" type="button">全部品牌</button></div>
+      <div class="section-heading"><div><p class="eyebrow">BASIC LENS PICKS</p><h2>選擇比價品牌</h2></div><button id="clear-brand" class="text-button" type="button">顯示全部</button></div>
       <div id="brand-grid" class="brand-grid"></div>
     </section>
-    <section id="shared-products" class="shared-products" aria-live="polite">
-      <p class="eyebrow">THREE-STORE OVERLAP</p><h2 id="shared-title">三站共同販售品項</h2>
-      <p id="shared-description">僅列出鏡后、睛美與 BBLens 的公開商品目錄都出現的同系列、同規格品項。</p>
-      <div id="shared-list" class="shared-list"></div>
-    </section>
     <section id="comparison" class="comparison" aria-live="polite">
-      <div class="comparison-heading"><p id="comparison-kicker" class="eyebrow">PRICE COMPARISON</p><h2 id="comparison-title">九大品牌商品價格總覽</h2><p id="comparison-description">點選品牌後，依同系列、同片數與相同促銷門檻，列出每個品項每片成本最低的前三個通路。</p></div>
+      <div class="comparison-heading"><p id="comparison-kicker" class="eyebrow">PRICE COMPARISON</p><h2 id="comparison-title">基本款每片價格前三名</h2><p id="comparison-description">挑選常見透明日拋基本款；每列都直接依鏡后、睛美、BBLens 的公開活動價，換算每片成本後排序。</p></div>
       <section class="controls" aria-label="篩選商品">
         <label>搜尋 <input id="search" type="search" placeholder="產品名稱或來源"></label>
         <label>來源 <select id="source"><option value="">全部來源</option></select></label>
@@ -41,7 +36,6 @@
       <div class="rankings"></div>
     </section>
   </template>
-  <template id="shared-template"><article class="shared-card"><h3></h3><p></p><span>鏡后・睛美・BBLens 皆有販售</span></article></template>
   <template id="card-template">
     <article class="card">
       <p class="rank"></p><div class="source"></div><h2></h2><p class="offer"></p>
