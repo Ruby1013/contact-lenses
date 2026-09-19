@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LensPrice｜隱形眼鏡價格比較</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">TAIWAN CONTACT LENS PRICE TRACKER</p>
+    <h1>一眼比較隱形眼鏡價格</h1>
+    <p>以總片數換算每片成本；促銷贈品會納入計算。</p>
+  </header>
+  <main>
+    <section class="brand-picker" aria-label="選擇要比較的品牌">
+      <div class="section-heading"><div><p class="eyebrow">CHOOSE A BRAND</p><h2>選擇品牌</h2></div><button id="clear-brand" class="text-button" type="button">全部品牌</button></div>
+      <div id="brand-grid" class="brand-grid"></div>
+    </section>
+    <section id="shared-products" class="shared-products" aria-live="polite">
+      <p class="eyebrow">THREE-STORE OVERLAP</p><h2 id="shared-title">三站共同販售品項</h2>
+      <p id="shared-description">僅列出鏡后、睛美與 BBLens 的公開商品目錄都出現的同系列、同規格品項。</p>
+      <div id="shared-list" class="shared-list"></div>
+    </section>
+    <section id="comparison" class="comparison" aria-live="polite">
+      <div class="comparison-heading"><p id="comparison-kicker" class="eyebrow">PRICE COMPARISON</p><h2 id="comparison-title">九大品牌商品價格總覽</h2><p id="comparison-description">點選品牌後，依同系列、同片數與相同促銷門檻，列出每個品項每片成本最低的前三個通路。</p></div>
+      <section class="controls" aria-label="篩選商品">
+        <label>搜尋 <input id="search" type="search" placeholder="產品名稱或來源"></label>
+        <label>來源 <select id="source"><option value="">全部來源</option></select></label>
+        <label>排序 <select id="sort"><option value="unitPrice">每片價格：低到高</option><option value="salePrice">總價：低到高</option><option value="checkedAt">最近更新</option></select></label>
+      </section>
+      <p id="summary" class="summary"></p>
+      <section id="products" class="grid"></section>
+      <p id="empty-state" class="empty-state" hidden>這個品牌尚未收錄商品。新增來源商品頁後，就會顯示在這裡。</p>
+    </section>
+    <p class="notice">價格為公開頁面擷取結果，結帳、運費、處方資格與限時活動可能影響最終金額；購買前請回到來源網站確認。</p>
+  </main>
+  <template id="ranking-template">
+    <section class="ranking-group">
+      <div class="ranking-heading"><div><p class="comparison-name"></p><h3></h3></div><p class="coverage"></p></div>
+      <div class="rankings"></div>
+    </section>
+  </template>
+  <template id="shared-template"><article class="shared-card"><h3></h3><p></p><span>鏡后・睛美・BBLens 皆有販售</span></article></template>
+  <template id="card-template">
+    <article class="card">
+      <p class="rank"></p><div class="source"></div><h2></h2><p class="offer"></p>
+      <div class="prices"><strong></strong><span></span></div>
+      <p class="unit"></p><p class="checked"></p><a target="_blank" rel="noreferrer">查看商品</a>
+    </article>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
