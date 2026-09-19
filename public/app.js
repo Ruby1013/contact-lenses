@@ -11,10 +11,11 @@ function targetBrand(product) {
 
 function renderBrandGrid() {
   const grid = $('brand-grid'); grid.innerHTML = '';
-  targetBrands.filter(brand => products.some(product => targetBrand(product)?.name === brand.name)).forEach(brand => {
+  targetBrands.forEach(brand => {
     const button = document.createElement('button');
     button.type = 'button'; button.className = `brand-button${selectedBrand === brand.name ? ' active' : ''}`;
-    button.innerHTML = `<span>${brand.name}</span><small>查看價格</small>`;
+    const count = new Set(products.filter(product => targetBrand(product)?.name === brand.name).map(comparisonKey)).size;
+    button.innerHTML = `<span>${brand.name}</span><small>${count ? `已收錄 ${count} 款基本品項` : '熱門基本款比價'}</small>`;
     button.addEventListener('click', () => selectBrand(brand.name));
     grid.append(button);
   });
@@ -22,10 +23,9 @@ function renderBrandGrid() {
 
 function selectBrand(name) {
   selectedBrand = name;
-  if (name) window.history.replaceState(null, '', `#${encodeURIComponent(name)}`);
-  else window.history.replaceState(null, '', window.location.pathname);
+  window.history.replaceState(null, '', `#${encodeURIComponent(name)}`);
   renderBrandGrid(); render();
-  if (name) $('comparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('comparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function comparisonKey(product) {
@@ -63,6 +63,9 @@ function appendProductCard(root, product, rank) {
 }
 
 function render() {
+  $('comparison').hidden = !selectedBrand;
+  $('landing-message').hidden = Boolean(selectedBrand);
+  if (!selectedBrand) return;
   const query = $('search').value.trim().toLowerCase();
   const source = $('source').value;
   const field = $('sort').value;
@@ -71,12 +74,10 @@ function render() {
     targetBrand(p) && (!selectedBrand || targetBrand(p)?.name === selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
   const groups = groupForRanking(filtered);
-  const title = selectedBrand ? `${selectedBrand} 基本款每片價格前三名` : '基本款每片價格前三名';
+  const title = `${selectedBrand} 熱門基本款・最便宜前三名`;
   $('comparison-title').textContent = title;
-  $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
-  $('comparison-description').textContent = selectedBrand
-    ? `每個品項只比較同系列、同片數與相同促銷門檻的資料；依每片成本列出前三低價。`
-    : '共挑選 6 款常見透明日拋，直接比較鏡后、睛美與 BBLens 的公開價格。';
+  $('comparison-kicker').textContent = `${selectedBrand.toUpperCase()} · PRICE COMPARISON`;
+  $('comparison-description').textContent = '每個品項依同系列、同規格與相同促銷門檻比價；排名以每片成本計算，點「查看商品」可回原官網確認。';
   $('summary').textContent = `已整理 ${groups.length} 款基本品項、${filtered.length} 筆公開價格資料${selectedBrand ? `（${selectedBrand}）` : ''}`;
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
@@ -98,7 +99,6 @@ Promise.all([fetch('products.json').then(response => response.json()), fetch('ta
   const requested = decodeURIComponent(window.location.hash.slice(1));
   if (targetBrands.some(brand => brand.name === requested)) selectedBrand = requested;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));
-  $('clear-brand').addEventListener('click', () => selectBrand(null));
   renderBrandGrid();
   render();
 });
