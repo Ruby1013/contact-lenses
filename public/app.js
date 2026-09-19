@@ -1,6 +1,7 @@
 const money = new Intl.NumberFormat('zh-TW', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
 let products = [];
 let targetBrands = [];
+let sourceSites = [];
 let selectedBrand = null;
 const $ = (id) => document.getElementById(id);
 
@@ -85,20 +86,26 @@ function render() {
     const section = $('ranking-template').content.cloneNode(true);
     section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
     section.querySelector('h3').textContent = group.name;
-    section.querySelector('.coverage').textContent = group.products.length >= 3
-      ? `三個官網・顯示前三名`
-      : `目前僅收錄 ${group.products.length} 家`;
+    const siteCount = new Set(group.products.map(product => product.source)).size;
+    section.querySelector('.coverage').textContent = siteCount >= 3
+      ? `已比對 ${siteCount} 個官網・顯示前三名`
+      : `已比對 ${siteCount} 個官網`;
     const rankings = section.querySelector('.rankings');
     group.products.slice(0, 3).forEach((product, index) => appendProductCard(rankings, product, index + 1));
     root.append(section);
   });
 }
 
-Promise.all([fetch('products.json').then(response => response.json()), fetch('target_brands.json').then(response => response.json())]).then(([data, brands]) => {
-  products = data; targetBrands = brands;
+Promise.all([
+  fetch('products.json').then(response => response.json()),
+  fetch('target_brands.json').then(response => response.json()),
+  fetch('source-sites.json').then(response => response.json())
+]).then(([data, brands, sites]) => {
+  products = data; targetBrands = brands; sourceSites = sites;
   const requested = decodeURIComponent(window.location.hash.slice(1));
   if (targetBrands.some(brand => brand.name === requested)) selectedBrand = requested;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));
+  $('source-pool').innerHTML = `比價來源池（${sourceSites.length} 站）：${sourceSites.map(site => `<a href="${site.url}" target="_blank" rel="noreferrer">${site.name}</a>`).join('、')}。排行榜只會納入該品項實際有販售且規格可對齊的網站。`;
   renderBrandGrid();
   render();
 });
