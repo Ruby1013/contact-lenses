@@ -2,5 +2,5 @@ services:
   - type: web
     name: contact-lenses
     runtime: static
-    buildCommand: echo "Static site ready"
-    staticPublishPath: .
+    buildCommand: mkdir -p public && cp index.html app.js styles.css products.json target_brands.json common-products.json public/
+    staticPublishPath: public

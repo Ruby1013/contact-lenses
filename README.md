@@ -16,7 +16,7 @@ python -m http.server 8000
 
 ## 部署到 Render
 
-在 Render 建立 **Static Site**，連結 GitHub 的 `Ruby1013/contact-lenses`，分支選 `main`。專案已附上 `render.yaml`：發布目錄為專案根目錄，不需要安裝套件或建置指令。
+在 Render 建立 **Static Site**，連結 GitHub 的 `Ruby1013/contact-lenses`，分支選 `main`。專案已附上 `render.yaml`：部署時會建立 `public` 目錄並放入靜態網站檔案，不需要安裝套件。
 
 ## 加入或更新商品
 
