@@ -14,6 +14,10 @@ python -m http.server 8000
 
 瀏覽器開啟 `http://localhost:8000`。
 
+## 部署到 Render
+
+在 Render 建立 **Static Site**，連結 GitHub 的 `Ruby1013/contact-lenses`，分支選 `main`。專案已附上 `render.yaml`：發布目錄為專案根目錄，不需要安裝套件或建置指令。
+
 ## 加入或更新商品
 
 商品頁必須是公開網址，且網域需列在 `collector.py` 的 `SOURCES`。此工具只讀取公開頁面，不登入、不加入購物車，也不下單。
