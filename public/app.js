@@ -129,21 +129,6 @@ function renderSourceOverview() {
   });
 }
 
-function renderBudgetPicks() {
-  const groups = groupForRanking(products.filter(product => !isSolution(product) && product.totalPieces >= 10));
-  const picks = targetBrands.map(brand => {
-    const leadingProducts = groups
-      .filter(group => targetBrand(group.products[0])?.name === brand.name && group.products[0].source === '鏡后 Lenses Queen')
-      .map(group => group.products[0])
-      .sort(rankingComparator);
-    return leadingProducts[0];
-  }).filter(Boolean);
-  $('budget-summary').textContent = `鏡后目前在 ${picks.length} 個品牌各有一款同規格最低價；每格只顯示一種品項。`;
-  const root = $('budget-products');
-  root.innerHTML = '';
-  picks.forEach((product, index) => appendProductCard(root, product, index + 1, '鏡后領先'));
-}
-
 function appendRankings(root, products, heading) {
   products.slice(0, 3).forEach((product, index) => appendProductCard(root, product, index + 1));
   const remaining = products.slice(3, 10);
@@ -269,7 +254,6 @@ Promise.all([
   $('source-pool-home').innerHTML = sourcePoolHtml;
   $('clear-brand').addEventListener('click', () => selectBrand(null));
   renderSourceOverview();
-  renderBudgetPicks();
   renderBrandGrid();
   renderVerifiedRankings();
   renderLensesQueenWinners();
