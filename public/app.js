@@ -94,9 +94,9 @@ function groupForRanking(records) {
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
 }
 
-function appendProductCard(root, product, rank) {
+function appendProductCard(root, product, rank, rankLabel) {
   const card = $('card-template').content.cloneNode(true);
-  card.querySelector('.rank').textContent = `第 ${rank} 低價`;
+  card.querySelector('.rank').textContent = rankLabel || `第 ${rank} 低價`;
   card.querySelector('.source').textContent = product.source;
   card.querySelector('h2').textContent = product.product;
   card.querySelector('.offer').textContent = isSolution(product)
@@ -108,6 +108,34 @@ function appendProductCard(root, product, rank) {
   card.querySelector('.checked').textContent = `更新：${new Date(product.checkedAt).toLocaleDateString('zh-TW')}`;
   const link = card.querySelector('a'); link.href = product.url;
   root.append(card);
+}
+
+function renderSourceOverview() {
+  const hasSourceData = (site) => products.some(product => product.source === site.name ||
+    (site.name === '鏡后' && product.source === '鏡后 Lenses Queen'));
+  const activeCount = sourceSites.filter(hasSourceData).length;
+  $('source-overview-summary').textContent = `追蹤 ${sourceSites.length} 個網站；其中 ${activeCount} 站已有公開價格資料。`;
+  const root = $('source-overview-links');
+  root.innerHTML = '';
+  sourceSites.forEach(site => {
+    const link = document.createElement('a');
+    const active = hasSourceData(site);
+    link.className = `source-site${active ? ' active' : ''}`;
+    link.href = site.url;
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    link.innerHTML = `<strong>${site.name}</strong><span>${active ? '已列入比價' : '價格核對中'}</span>`;
+    root.append(link);
+  });
+}
+
+function renderBudgetPicks() {
+  const groups = groupForRanking(products.filter(product => !isSolution(product) && product.totalPieces >= 20));
+  const picks = groups.map(group => group.products[0]).sort(rankingComparator).slice(0, 4);
+  $('budget-summary').textContent = `從 ${groups.length} 款可換算品項中，挑出目前每片成本最低的 4 款組合。`;
+  const root = $('budget-products');
+  root.innerHTML = '';
+  picks.forEach((product, index) => appendProductCard(root, product, index + 1, `推薦 ${index + 1}`));
 }
 
 function appendRankings(root, products, heading) {
@@ -234,6 +262,8 @@ Promise.all([
   $('source-pool').innerHTML = sourcePoolHtml;
   $('source-pool-home').innerHTML = sourcePoolHtml;
   $('clear-brand').addEventListener('click', () => selectBrand(null));
+  renderSourceOverview();
+  renderBudgetPicks();
   renderBrandGrid();
   renderVerifiedRankings();
   renderLensesQueenWinners();
