@@ -71,15 +71,40 @@ function appendProductCard(root, product, rank) {
 }
 
 function renderVerifiedRankings() {
-  const verified = groupForRanking(products)
-    .filter(group => new Set(group.products.map(product => product.source)).size >= 3);
-  $('verified-summary').textContent = `已完成 ${verified.length} 款品項的三站以上比價，以下直接顯示每款最便宜前三名。`;
+  const representativeKeys = {
+    '酷柏': 'cooper-oculclear-daily-30',
+    '博士倫': 'bausch-biotrue-daily-30',
+    '晶碩': null,
+    '海昌': 'hydron-mind-color-daily-10',
+    '嬌生安視優': 'acuvue-moist-daily-30',
+    '美若康': 'miacare-zhanmei-xingsu-daily-10',
+    '愛爾康': 'alcon-total1-daily-30',
+    '帝康': 'ticon-aspheric-clear-daily-20',
+    '星歐': 'largan-clear-daily-30'
+  };
+  const groups = groupForRanking(products);
+  const completeCount = targetBrands.filter(brand => {
+    const group = groups.find(item => item.key === representativeKeys[brand.name]);
+    return group && new Set(group.products.map(product => product.source)).size >= 3;
+  }).length;
+  $('verified-summary').textContent = `九個品牌各挑一款代表基本品項；目前 ${completeCount} 個品牌已完成三站以上比較。`;
   const root = $('verified-products'); root.innerHTML = '';
-  verified.forEach(group => {
+  targetBrands.forEach(brand => {
+    const group = groups.find(item => item.key === representativeKeys[brand.name]);
     const section = $('ranking-template').content.cloneNode(true);
-    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
+    section.querySelector('.comparison-name').textContent = `${brand.name}・同規格每片成本排序`;
+    if (!group) {
+      section.querySelector('h3').textContent = `${brand.name} 代表基本款`;
+      section.querySelector('.coverage').textContent = '品項資料核對中';
+      section.querySelector('.rankings').innerHTML = '<p class="pending-source">這個品牌的代表基本款正在逐站核對公開售價，確認規格一致後才會列入前三名。</p>';
+      root.append(section);
+      return;
+    }
+    const siteCount = new Set(group.products.map(product => product.source)).size;
     section.querySelector('h3').textContent = group.name;
-    section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
+    section.querySelector('.coverage').textContent = siteCount >= 3
+      ? `已比對 ${siteCount} 個官網・顯示前三名`
+      : `目前已比對 ${siteCount} 個官網・持續補價`;
     const rankings = section.querySelector('.rankings');
     group.products.slice(0, 3).forEach((product, index) => appendProductCard(rankings, product, index + 1));
     root.append(section);
