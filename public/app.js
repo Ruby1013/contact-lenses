@@ -59,12 +59,14 @@ function groupMetricLabel(group) {
 }
 
 function formatUnitPrice(product) {
-  return isSolution(product) ? `NT$${product.unitPrice.toFixed(2)}` : money.format(product.unitPrice);
+  return isSolution(product)
+    ? `NT$${product.unitPrice.toFixed(2)}`
+    : money.format(Math.floor(product.unitPrice));
 }
 
 function rankingComparator(a, b) {
-  const roundedUnitDifference = Math.round(a.unitPrice ?? Infinity) - Math.round(b.unitPrice ?? Infinity);
-  if (roundedUnitDifference) return roundedUnitDifference;
+  const truncatedUnitDifference = Math.floor(a.unitPrice ?? Infinity) - Math.floor(b.unitPrice ?? Infinity);
+  if (truncatedUnitDifference) return truncatedUnitDifference;
 
   const checkoutDifference = (a.salePrice ?? Infinity) - (b.salePrice ?? Infinity);
   if (checkoutDifference) return checkoutDifference;
