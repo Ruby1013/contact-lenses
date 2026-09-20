@@ -32,8 +32,8 @@ function renderBrandGrid() {
 function selectBrand(name) {
   selectedBrand = name;
   renderBrandGrid();
-  $('verified-ranking').hidden = Boolean(selectedBrand);
-  $('lq-winners').hidden = Boolean(selectedBrand);
+  $('verified-ranking').hidden = true;
+  $('lq-winners').hidden = true;
   render();
   $('comparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -197,6 +197,8 @@ Promise.all([
   fetch('source-sites.json').then(response => response.json())
 ]).then(([data, brands, sites]) => {
   products = data; targetBrands = brands; sourceSites = sites;
+  $('brand-picker').after($('comparison'));
+  $('comparison').querySelector('.comparison-heading').hidden = true;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));
   const sourcePoolHtml = `比價來源池（${sourceSites.length} 站）：${sourceSites.map(site => `<a href="${site.url}" target="_blank" rel="noreferrer">${site.name}</a>`).join('、')}。`;
   $('source-pool').innerHTML = sourcePoolHtml;
