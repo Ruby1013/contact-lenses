@@ -12,6 +12,13 @@ function targetBrand(product) {
 
 function renderBrandGrid() {
   const grid = $('brand-grid'); grid.innerHTML = '';
+  grid.hidden = Boolean(selectedBrand);
+  $('brand-picker').classList.toggle('brand-selected', Boolean(selectedBrand));
+  $('brand-picker-title').textContent = selectedBrand ? `已選擇：${selectedBrand}` : '選擇你要比價的品牌';
+  $('selected-brand-note').hidden = !selectedBrand;
+  $('selected-brand-note').textContent = selectedBrand ? '正在顯示這個品牌所有已完成比價的品項。' : '';
+  $('clear-brand').textContent = selectedBrand ? '重新選擇品牌' : '全部排行榜';
+  $('clear-brand').hidden = !selectedBrand;
   targetBrands.forEach(brand => {
     const button = document.createElement('button');
     button.type = 'button'; button.className = `brand-button${selectedBrand === brand.name ? ' active' : ''}`;
@@ -24,7 +31,10 @@ function renderBrandGrid() {
 
 function selectBrand(name) {
   selectedBrand = name;
-  renderBrandGrid(); render();
+  renderBrandGrid();
+  $('verified-ranking').hidden = Boolean(selectedBrand);
+  $('lq-winners').hidden = Boolean(selectedBrand);
+  render();
   $('comparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -159,11 +169,11 @@ function render() {
   if (selectedBrand) {
     groups = groups.filter(group => new Set(group.products.map(product => product.source)).size >= 3);
   }
-  const title = selectedBrand ? `${selectedBrand} 熱門基本款・最便宜前三名` : '熱門基本款・同規格每片成本排序';
+  const title = selectedBrand ? `${selectedBrand} 全部已比價品項・最便宜前三名` : '熱門基本款・同規格每片成本排序';
   $('comparison-title').textContent = title;
   $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
   $('comparison-description').textContent = selectedBrand
-    ? '只顯示已完成至少 3 個官網、同系列同規格的品項；每款固定依每片成本列出最便宜前三名，點「查看商品」可回原官網確認。'
+    ? '只顯示此品牌已完成至少 3 個官網、同系列同規格的品項；每款固定依每片成本列出最便宜前三名，點「查看商品」可回原官網確認。'
     : '先從九宮格選品牌可縮小結果；下方則保留所有已收錄熱門基本款的同規格價格排序。';
   $('summary').textContent = selectedBrand
     ? `已完成 ${groups.length} 款 ${selectedBrand} 品項的三站以上比價，以下每款顯示最便宜前三名。`
