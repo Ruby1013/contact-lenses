@@ -112,11 +112,7 @@ function renderVerifiedRankings() {
     '星歐': 'largan-clear-daily-30'
   };
   const groups = groupForRanking(products);
-  const completeCount = targetBrands.filter(brand => {
-    const group = groups.find(item => item.key === representativeKeys[brand.name]);
-    return group && new Set(group.products.map(product => product.source)).size >= 3;
-  }).length;
-  $('verified-summary').textContent = `九個品牌各挑一款代表基本品項；目前 ${completeCount} 個品牌已完成三站以上比較。`;
+  $('verified-summary').textContent = '同規格・每片成本排序';
   const root = $('verified-products'); root.innerHTML = '';
   targetBrands.forEach(brand => {
     const group = groups.find(item => item.key === representativeKeys[brand.name]);
