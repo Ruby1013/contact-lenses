@@ -138,8 +138,14 @@ def brand_from_title(title: str) -> str:
     for canonical, aliases in target_brands.items():
         if any(alias.lower() in title.lower() for alias in aliases):
             return canonical
-    for brand in ("星歐", "帝康", "實瞳", "昆凌", "視茂"):
-        if brand in title:
+    for brand, aliases in {
+        "星歐": ("星歐", "LARGAN", "卡沛兒", "CAPELL"),
+        "帝康": ("帝康", "TICON"),
+        "實瞳": ("實瞳", "SEED"),
+        "昆凌": ("昆凌", "QUINLIVAN"),
+        "視茂": ("視茂", "SMART VISION"),
+    }.items():
+        if any(alias.lower() in title.lower() for alias in aliases):
             return brand
     return "未分類"
 
