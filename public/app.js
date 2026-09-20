@@ -111,6 +111,24 @@ function renderVerifiedRankings() {
   });
 }
 
+function renderLensesQueenWinners() {
+  const winners = groupForRanking(products).filter(group => {
+    const sources = new Set(group.products.map(product => product.source));
+    return sources.size >= 3 && group.products[0]?.source === '鏡后 Lenses Queen';
+  });
+  $('lq-summary').textContent = `已找到 ${winners.length} 款鏡后排名第一或並列第一的同規格品項。`;
+  const root = $('lq-products'); root.innerHTML = '';
+  winners.forEach(group => {
+    const section = $('ranking-template').content.cloneNode(true);
+    section.querySelector('.comparison-name').textContent = '鏡后最低・同規格每片成本排序';
+    section.querySelector('h3').textContent = group.name;
+    section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
+    const rankings = section.querySelector('.rankings');
+    group.products.slice(0, 3).forEach((product, index) => appendProductCard(rankings, product, index + 1));
+    root.append(section);
+  });
+}
+
 function render() {
   $('comparison').hidden = false;
   const query = $('search').value.trim().toLowerCase();
@@ -155,6 +173,7 @@ Promise.all([
   $('clear-brand').addEventListener('click', () => selectBrand(null));
   renderBrandGrid();
   renderVerifiedRankings();
+  renderLensesQueenWinners();
   render();
 });
 ['search', 'source', 'sort'].forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', render));
