@@ -80,7 +80,7 @@ function appendProductCard(root, product, rank) {
   root.append(card);
 }
 
-function appendRankings(root, products) {
+function appendRankings(root, products, heading) {
   products.slice(0, 3).forEach((product, index) => appendProductCard(root, product, index + 1));
   const remaining = products.slice(3, 10);
   if (!remaining.length) return;
@@ -96,7 +96,8 @@ function appendRankings(root, products) {
     extra.hidden = !extra.hidden;
     toggle.textContent = extra.hidden ? '查看第 4～10 名' : '收起其他名次';
   });
-  root.after(toggle, extra);
+  heading.append(toggle);
+  root.after(extra);
 }
 
 function renderVerifiedRankings() {
@@ -131,7 +132,7 @@ function renderVerifiedRankings() {
       ? `已比對 ${siteCount} 個官網・顯示前三名`
       : `目前已比對 ${siteCount} 個官網・持續補價`;
     const rankings = section.querySelector('.rankings');
-    appendRankings(rankings, group.products);
+    appendRankings(rankings, group.products, section.querySelector('.ranking-heading'));
     root.append(section);
   });
 }
@@ -147,7 +148,7 @@ function renderLensesQueenWinners() {
     section.querySelector('h3').textContent = group.name;
     section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
     const rankings = section.querySelector('.rankings');
-    appendRankings(rankings, group.products);
+    appendRankings(rankings, group.products, section.querySelector('.ranking-heading'));
     root.append(section);
   });
 }
@@ -182,7 +183,7 @@ function render() {
       ? `已比對 ${siteCount} 個官網・顯示前三名`
       : `已比對 ${siteCount} 個官網`;
     const rankings = section.querySelector('.rankings');
-    appendRankings(rankings, group.products);
+    appendRankings(rankings, group.products, section.querySelector('.ranking-heading'));
     root.append(section);
   });
 }
