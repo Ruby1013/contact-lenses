@@ -70,6 +70,22 @@ function appendProductCard(root, product, rank) {
   root.append(card);
 }
 
+function renderVerifiedRankings() {
+  const verified = groupForRanking(products)
+    .filter(group => new Set(group.products.map(product => product.source)).size >= 3);
+  $('verified-summary').textContent = `已完成 ${verified.length} 款品項的三站以上比價，以下直接顯示每款最便宜前三名。`;
+  const root = $('verified-products'); root.innerHTML = '';
+  verified.forEach(group => {
+    const section = $('ranking-template').content.cloneNode(true);
+    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
+    section.querySelector('h3').textContent = group.name;
+    section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
+    const rankings = section.querySelector('.rankings');
+    group.products.slice(0, 3).forEach((product, index) => appendProductCard(rankings, product, index + 1));
+    root.append(section);
+  });
+}
+
 function render() {
   $('comparison').hidden = false;
   const query = $('search').value.trim().toLowerCase();
@@ -113,6 +129,7 @@ Promise.all([
   $('source-pool').innerHTML = `比價來源池（${sourceSites.length} 站）：${sourceSites.map(site => `<a href="${site.url}" target="_blank" rel="noreferrer">${site.name}</a>`).join('、')}。排行榜只會納入該品項實際有販售且規格可對齊的網站。`;
   $('clear-brand').addEventListener('click', () => selectBrand(null));
   renderBrandGrid();
+  renderVerifiedRankings();
   render();
 });
 ['search', 'source', 'sort'].forEach(id => $(id).addEventListener(id === 'search' ? 'input' : 'change', render));
