@@ -46,6 +46,16 @@ function comparisonName(product) {
   return product.comparisonName || product.product;
 }
 
+function rankingComparator(a, b) {
+  const roundedUnitDifference = Math.round(a.unitPrice ?? Infinity) - Math.round(b.unitPrice ?? Infinity);
+  if (roundedUnitDifference) return roundedUnitDifference;
+
+  const checkoutDifference = (a.salePrice ?? Infinity) - (b.salePrice ?? Infinity);
+  if (checkoutDifference) return checkoutDifference;
+
+  return (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity);
+}
+
 function groupForRanking(records) {
   const groups = new Map();
   records.forEach(product => {
@@ -55,7 +65,7 @@ function groupForRanking(records) {
   });
   return [...groups.values()]
     .map(group => {
-      const sorted = group.products.sort((a, b) => (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity));
+      const sorted = group.products.sort(rankingComparator);
       const sources = new Set();
       return { ...group, products: sorted.filter(product => {
         if (sources.has(product.source)) return false;
