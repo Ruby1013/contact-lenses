@@ -74,7 +74,7 @@ function renderVerifiedRankings() {
   const representativeKeys = {
     '酷柏': 'cooper-oculclear-daily-30',
     '博士倫': 'bausch-biotrue-daily-30',
-    '晶碩': null,
+    '安儷': 'anley-clear-daily-30',
     '海昌': 'hydron-mind-color-daily-10',
     '嬌生安視優': 'acuvue-moist-daily-30',
     '美若康': 'miacare-zhanmei-xingsu-daily-10',
