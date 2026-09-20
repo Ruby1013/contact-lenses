@@ -46,6 +46,22 @@ function comparisonName(product) {
   return product.comparisonName || product.product;
 }
 
+function isSolution(product) {
+  return Number.isFinite(product.volumeMl) && product.volumeMl > 0;
+}
+
+function metricLabel(product) {
+  return isSolution(product) ? '每毫升' : '每片';
+}
+
+function groupMetricLabel(group) {
+  return metricLabel(group.products[0]);
+}
+
+function formatUnitPrice(product) {
+  return isSolution(product) ? `NT$${product.unitPrice.toFixed(2)}` : money.format(product.unitPrice);
+}
+
 function rankingComparator(a, b) {
   const roundedUnitDifference = Math.round(a.unitPrice ?? Infinity) - Math.round(b.unitPrice ?? Infinity);
   if (roundedUnitDifference) return roundedUnitDifference;
@@ -81,10 +97,12 @@ function appendProductCard(root, product, rank) {
   card.querySelector('.rank').textContent = `第 ${rank} 低價`;
   card.querySelector('.source').textContent = product.source;
   card.querySelector('h2').textContent = product.product;
-  card.querySelector('.offer').textContent = `${product.piecesPerBox || '?'} 片／盒・買 ${product.boughtBoxes} 盒${product.giftBoxes ? `・送 ${product.giftBoxes} 盒` : ''}${product.note ? `・${product.note}` : ''}`;
+  card.querySelector('.offer').textContent = isSolution(product)
+    ? `${product.volumeMl} ML／瓶・買 ${product.boughtBoxes} 瓶${product.giftBoxes ? `・送 ${product.giftBoxes} 瓶` : ''}${product.note ? `・${product.note}` : ''}`
+    : `${product.piecesPerBox || '?'} 片／盒・買 ${product.boughtBoxes} 盒${product.giftBoxes ? `・送 ${product.giftBoxes} 盒` : ''}${product.note ? `・${product.note}` : ''}`;
   card.querySelector('.prices strong').textContent = money.format(product.salePrice);
   card.querySelector('.prices span').textContent = product.listPrice ? `原價 ${money.format(product.listPrice)}` : '';
-  card.querySelector('.unit').textContent = product.unitPrice ? `每片約 ${money.format(product.unitPrice)}` : '缺少片數，無法換算';
+  card.querySelector('.unit').textContent = product.unitPrice ? `${metricLabel(product)}約 ${formatUnitPrice(product)}` : isSolution(product) ? '缺少容量，無法換算' : '缺少片數，無法換算';
   card.querySelector('.checked').textContent = `更新：${new Date(product.checkedAt).toLocaleDateString('zh-TW')}`;
   const link = card.querySelector('a'); link.href = product.url;
   root.append(card);
@@ -154,7 +172,7 @@ function renderLensesQueenWinners() {
   const root = $('lq-products'); root.innerHTML = '';
   winners.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
-    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
+    section.querySelector('.comparison-name').textContent = `同規格・${groupMetricLabel(group)}成本排序`;
     section.querySelector('h3').textContent = group.name;
     section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
     const rankings = section.querySelector('.rankings');
@@ -189,7 +207,7 @@ function render() {
   $('empty-state').hidden = groups.length !== 0;
   groups.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
-    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
+    section.querySelector('.comparison-name').textContent = `同規格・${groupMetricLabel(group)}成本排序`;
     section.querySelector('h3').textContent = group.name;
     const siteCount = new Set(group.products.map(product => product.source)).size;
     section.querySelector('.coverage').textContent = siteCount >= 3
