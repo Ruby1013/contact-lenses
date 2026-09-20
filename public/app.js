@@ -112,15 +112,13 @@ function renderVerifiedRankings() {
 }
 
 function renderLensesQueenWinners() {
-  const winners = groupForRanking(products).filter(group => {
-    const sources = new Set(group.products.map(product => product.source));
-    return sources.size >= 3 && group.products[0]?.source === '鏡后 Lenses Queen';
-  });
-  $('lq-summary').textContent = `已找到 ${winners.length} 款鏡后排名第一或並列第一的同規格品項。`;
+  const winners = groupForRanking(products)
+    .filter(group => new Set(group.products.map(product => product.source)).size >= 3);
+  $('lq-summary').textContent = `已完成 ${winners.length} 款品項的三站以上比價，以下直接顯示每款最便宜前三名。`;
   const root = $('lq-products'); root.innerHTML = '';
   winners.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
-    section.querySelector('.comparison-name').textContent = '鏡后最低・同規格每片成本排序';
+    section.querySelector('.comparison-name').textContent = '同規格・每片成本排序';
     section.querySelector('h3').textContent = group.name;
     section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
     const rankings = section.querySelector('.rankings');
