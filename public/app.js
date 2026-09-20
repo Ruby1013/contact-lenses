@@ -162,7 +162,10 @@ function render() {
     (!query || [p.brand, p.product, p.source].join(' ').toLowerCase().includes(query)) &&
     targetBrand(p) && (!selectedBrand || targetBrand(p)?.name === selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
-  const groups = groupForRanking(filtered);
+  const groups = groupForRanking(filtered).sort((a, b) => {
+    const sourceDifference = new Set(b.products.map(product => product.source)).size - new Set(a.products.map(product => product.source)).size;
+    return sourceDifference || a.name.localeCompare(b.name, 'zh-Hant');
+  });
   const title = selectedBrand ? `${selectedBrand} 全部已比價品項・最便宜前三名` : '熱門基本款・同規格每片成本排序';
   $('comparison-title').textContent = title;
   $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
