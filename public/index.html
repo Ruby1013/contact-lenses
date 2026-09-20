@@ -30,13 +30,14 @@
     </section>
     <section id="comparison" class="comparison" aria-live="polite">
       <div class="comparison-heading"><p id="comparison-kicker" class="eyebrow">PRICE COMPARISON</p><h2 id="comparison-title">基本款每片價格前三名</h2><p id="comparison-description">挑選常見透明日拋基本款；每列都直接依鏡后、睛美、BBLens 的公開活動價，換算每片成本後排序。</p></div>
-      <p id="source-pool" class="source-pool"></p>
-      <section class="controls" aria-label="篩選商品">
+      <p class="motivation">設計這個比價工具，是希望讓大家更快看出同款隱形眼鏡在哪裡更便宜，減少逐站查價的時間，也減少不必要的花費。</p>
+      <p id="source-pool" class="source-pool" hidden></p>
+      <section class="controls" aria-label="篩選商品" hidden>
         <label>搜尋 <input id="search" type="search" placeholder="產品名稱或來源"></label>
         <label>來源 <select id="source"><option value="">全部來源</option></select></label>
         <label>排序 <select id="sort"><option value="unitPrice">每片價格：低到高</option><option value="salePrice">總價：低到高</option><option value="checkedAt">最近更新</option></select></label>
       </section>
-      <p id="summary" class="summary"></p>
+      <p id="summary" class="summary" hidden></p>
       <section id="products" class="grid"></section>
       <p id="empty-state" class="empty-state" hidden>這個品牌的基本款資料正在核對中。會以你提供的官網公開價格，列出可確認的前三低價。</p>
     </section>
