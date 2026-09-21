@@ -173,10 +173,30 @@ def extract(url: str) -> dict:
     }
 
 
+def merge_record(products: list[dict], record: dict, comparison_key: str | None = None) -> list[dict]:
+    matches = [product for product in products if product["url"] == record["url"]]
+    if len(matches) > 1:
+        raise ValueError("This URL represents multiple products; use a specific product page instead.")
+    previous = matches[0] if matches else {}
+    key = comparison_key or previous.get("comparisonKey")
+    if not key:
+        raise ValueError("A comparison key is required; pass --comparison-key for a verified matching group.")
+    group = next((product for product in products if product.get("comparisonKey") == key), None)
+    if group is None:
+        raise ValueError("Unknown comparison key; create and verify the product group before collecting prices.")
+    if not record.get("totalPieces") or not record.get("piecesPerBox"):
+        raise ValueError("Could not verify the package size; review the product page before saving.")
+    if record["piecesPerBox"] != group.get("piecesPerBox"):
+        raise ValueError("Package size differs from the comparison group; review before saving.")
+    record = {**record, "comparisonKey": key, "comparisonName": group["comparisonName"]}
+    return [product for product in products if product["url"] != record["url"]] + [record]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Add a public product page to products.json")
     parser.add_argument("url", help="Public product URL from one of the configured sources")
     parser.add_argument("--dry-run", action="store_true", help="Print extracted data without saving it")
+    parser.add_argument("--comparison-key", help="Existing, manually verified same-product comparison group")
     args = parser.parse_args()
 
     if source_name(args.url) == urlparse(args.url).netloc:
@@ -191,8 +211,11 @@ def main() -> int:
         return 0
 
     products = json.loads(PRODUCTS_FILE.read_text(encoding="utf-8"))
-    products = [product for product in products if product["url"] != args.url]
-    products.append(record)
+    try:
+        products = merge_record(products, record, args.comparison_key)
+    except ValueError as error:
+        print(str(error), file=sys.stderr)
+        return 2
     PRODUCTS_FILE.write_text(json.dumps(products, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Saved {len(products)} products to {PRODUCTS_FILE.name}.")
     time.sleep(0.5)  # keep manual / scheduled runs courteous to retail sites

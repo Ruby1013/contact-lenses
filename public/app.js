@@ -47,7 +47,17 @@ function comparisonName(product) {
 }
 
 function isSolution(product) {
-  return Number.isFinite(product.volumeMl) && product.volumeMl > 0;
+  return product.productType === 'solution' || Number.isFinite(product.totalVolumeMl) ||
+    (Number.isFinite(product.volumeMl) && product.volumeMl > 0);
+}
+
+function normalizeProduct(product) {
+  if (!isSolution(product)) return product;
+  const totalVolumeMl = product.totalVolumeMl ??
+    product.volumeMl * ((product.boughtBoxes ?? 1) + (product.giftBoxes ?? 0));
+  return { ...product, totalVolumeMl,
+    unitPrice: Number.isFinite(totalVolumeMl) && totalVolumeMl > 0 && Number.isFinite(product.salePrice)
+      ? product.salePrice / totalVolumeMl : null };
 }
 
 function metricLabel(product) {
@@ -69,6 +79,10 @@ function formatUnitPrice(product) {
 }
 
 function rankingComparator(a, b) {
+  if (isSolution(a) || isSolution(b)) {
+    const price = p => Number.isFinite(p.unitPrice) && p.unitPrice > 0 ? p.unitPrice : Infinity;
+    return (price(a) - price(b)) || ((a.salePrice ?? Infinity) - (b.salePrice ?? Infinity));
+  }
   const truncatedUnitDifference = Math.floor(a.unitPrice ?? Infinity) - Math.floor(b.unitPrice ?? Infinity);
   if (truncatedUnitDifference) return truncatedUnitDifference;
 
@@ -78,7 +92,7 @@ function rankingComparator(a, b) {
   return (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity);
 }
 
-function groupForRanking(records) {
+function groupForRanking(records, comparator = rankingComparator) {
   const groups = new Map();
   records.forEach(product => {
     const key = comparisonKey(product);
@@ -87,7 +101,7 @@ function groupForRanking(records) {
   });
   return [...groups.values()]
     .map(group => {
-      const sorted = group.products.sort(rankingComparator);
+      const sorted = group.products.sort(comparator);
       const sources = new Set();
       return { ...group, products: sorted.filter(product => {
         if (sources.has(product.source)) return false;
@@ -98,17 +112,67 @@ function groupForRanking(records) {
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant'));
 }
 
-function appendProductCard(root, product, rank, rankLabel) {
+function cooperRankingModes(records) {
+  const exactCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
+    ? p.salePrice / p.totalPieces : Infinity;
+  const compare = (a, b) => (exactCost(a) - exactCost(b)) || (a.salePrice - b.salePrice);
+  return [
+    { name: '單盒＋量販一起比', accepts: p => true },
+    { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
+    { name: '量販比價', accepts: p => p.boughtBoxes > 1 }
+  ].map(mode => ({ name: mode.name,
+    products: groupForRanking(records.filter(mode.accepts), compare)[0]?.products || [] }));
+}
+
+function appendCooperRankings(root, group, records) {
+  const section = document.createElement('section');
+  section.className = 'ranking-group cooper-group';
+  const title = document.createElement('h3');
+  title.textContent = group.name;
+  const note = document.createElement('p');
+  note.className = 'cooper-note';
+  note.textContent = '依實際每片成本排名；單盒含買 1 盒附贈，量販需買 2 盒以上。各榜每家取最便宜方案，不足 3 家照實列出。';
+  section.append(title, note);
+  // Split the raw offers before choosing each shop's cheapest offer.
+  cooperRankingModes(records.filter(p => comparisonKey(p) === group.key)).forEach(mode => {
+    const block = document.createElement('section');
+    block.className = 'purchase-ranking';
+    const heading = document.createElement('div');
+    heading.className = 'ranking-heading';
+    const label = document.createElement('h4');
+    label.textContent = mode.name;
+    const coverage = document.createElement('p');
+    coverage.className = 'coverage';
+    const count = mode.products.length;
+    coverage.textContent = count ? `已收錄 ${count} 家・顯示前 ${Math.min(count, 3)} 名` : '尚無已收錄方案';
+    heading.append(label, coverage);
+    const cards = document.createElement('div');
+    cards.className = 'rankings';
+    block.append(heading, cards);
+    if (count) {
+      appendRankings(cards, mode.products.map(p => ({ ...p, unitPrice: p.salePrice / p.totalPieces })), heading, true);
+    } else {
+      const empty = document.createElement('p');
+      empty.className = 'pending-source';
+      empty.textContent = '目前尚未收錄此類方案，並不代表商家沒有販售。';
+      cards.append(empty);
+    }
+    section.append(block);
+  });
+  root.append(section);
+}
+
+function appendProductCard(root, product, rank, rankLabel, precise = false) {
   const card = $('card-template').content.cloneNode(true);
   card.querySelector('.rank').textContent = rankLabel || `第 ${rank} 低價`;
   card.querySelector('.source').textContent = product.source;
   card.querySelector('h2').textContent = product.product;
   card.querySelector('.offer').textContent = isSolution(product)
-    ? `${product.volumeMl} ML／瓶・買 ${product.boughtBoxes} 瓶${product.giftBoxes ? `・送 ${product.giftBoxes} 瓶` : ''}${product.note ? `・${product.note}` : ''}`
+    ? `${product.volumeMl ? `${product.volumeMl} ML／瓶・` : ''}總容量 ${product.totalVolumeMl || '?'} ML${product.note ? `・${product.note}` : ''}`
     : `${product.piecesPerBox || '?'} 片／盒・買 ${product.boughtBoxes} 盒${product.giftBoxes ? `・送 ${product.giftBoxes} 盒` : ''}${product.note ? `・${product.note}` : ''}`;
   card.querySelector('.prices strong').textContent = money.format(product.salePrice);
   card.querySelector('.prices span').textContent = product.listPrice ? `原價 ${money.format(product.listPrice)}` : '';
-  card.querySelector('.unit').textContent = product.unitPrice ? `${metricLabel(product)}約 ${formatUnitPrice(product)}` : isSolution(product) ? '缺少容量，無法換算' : '缺少片數，無法換算';
+  card.querySelector('.unit').textContent = product.unitPrice ? `${metricLabel(product)}約 ${precise ? `NT$${product.unitPrice.toFixed(2)}` : formatUnitPrice(product)}` : isSolution(product) ? '缺少容量，無法換算' : '缺少片數，無法換算';
   card.querySelector('.checked').textContent = `更新：${new Date(product.checkedAt).toLocaleDateString('zh-TW')}`;
   const link = card.querySelector('a'); link.href = product.url;
   root.append(card);
@@ -133,8 +197,8 @@ function renderSourceOverview() {
   });
 }
 
-function appendRankings(root, products, heading) {
-  products.slice(0, 3).forEach((product, index) => appendProductCard(root, product, index + 1));
+function appendRankings(root, products, heading, precise = false) {
+  products.slice(0, 3).forEach((product, index) => appendProductCard(root, product, index + 1, null, precise));
   const remaining = products.slice(3, 10);
   if (!remaining.length) return;
   const toggle = document.createElement('button');
@@ -144,7 +208,7 @@ function appendRankings(root, products, heading) {
   const extra = document.createElement('div');
   extra.className = 'rankings extra-rankings';
   extra.hidden = true;
-  remaining.forEach((product, index) => appendProductCard(extra, product, index + 4));
+  remaining.forEach((product, index) => appendProductCard(extra, product, index + 4, null, precise));
   toggle.addEventListener('click', () => {
     extra.hidden = !extra.hidden;
     toggle.textContent = extra.hidden ? '查看第 4～10 名' : '收起其他名次';
@@ -233,6 +297,10 @@ function render() {
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
   groups.forEach(group => {
+    if (targetBrand(group.products[0])?.name === '酷柏') {
+      appendCooperRankings(root, group, filtered);
+      return;
+    }
     const section = $('ranking-template').content.cloneNode(true);
     section.querySelector('.comparison-name').textContent = `同規格・${groupMetricLabel(group)}成本排序`;
     section.querySelector('h3').textContent = group.name;
@@ -249,7 +317,7 @@ Promise.all([
   fetch('target_brands.json').then(response => response.json()),
   fetch('source-sites.json').then(response => response.json())
 ]).then(([data, brands, sites]) => {
-  products = data; targetBrands = brands; sourceSites = sites;
+  products = data.map(normalizeProduct); targetBrands = brands; sourceSites = sites;
   $('brand-picker').after($('comparison'));
   $('comparison').querySelector('.comparison-heading').hidden = true;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));

@@ -6,6 +6,8 @@
 
 ## 開啟比較頁
 
+酷柏先試行每個品項三種排行榜：單盒＋量販一起比、單盒比價、量販比價。買 1 盒（含附贈）歸單盒，需買 2 盒以上歸量販；先分購買門檻，再在各榜選每個商家最便宜的方案。品項沿用整體至少三站的收錄門檻，子榜不足三家照實顯示，沒有資料則標示尚未收錄。酷柏依總價／實得總片數的完整精度排名，單價顯示兩位小數。執行 `node test_cooper.cjs` 驗證。
+
 不需要安裝套件：
 
 ```bash
@@ -23,7 +25,7 @@ python -m http.server 8000 --directory public
 商品頁必須是公開網址，且網域需列在 `collector.py` 的 `SOURCES`。此工具只讀取公開頁面，不登入、不加入購物車，也不下單。
 
 ```bash
-python collector.py "商品頁網址"
+python collector.py "商品頁網址" --comparison-key "已核對的既有 comparisonKey"
 ```
 
 先檢查擷取結果、不寫入資料：
@@ -34,7 +36,11 @@ python collector.py --dry-run "商品頁網址"
 
 資料會寫入 `products.json`。若商店版型或促銷文案改變，請先用 `--dry-run` 檢查 `piecesPerBox`、`giftBoxes` 與 `unitPrice` 是否正確。
 
+新增來源時，必須人工確認商品系列與規格，並指定既有 `--comparison-key`，避免有價格卻未加入跨站排行榜。更新同一商品網址會保留原比價群組；共用分類網址的多筆商品、缺少片數或片數不符時會拒絕寫入，避免誤刪或錯配。`--dry-run` 只預覽擷取結果，不代表通過寫入驗證。來源池的「已列入比價」僅表示收錄該網站的部分商品，不表示已完整收錄所有品項。
+
 ## 資料欄位
+
+保養液與舒潤液使用 `productType: "solution"`、`volumeMl`（每瓶／支容量）與 `totalVolumeMl`（整組實得容量）。混合容量組合只填總容量，不冒用每瓶容量。每毫升成本為 `salePrice / totalVolumeMl`，排序使用未取整的小數，顯示至小數兩位。既有液體商品已補齊容量；前端載入時重新換算，避免沿用缺漏或為 0 的單價。驗證：`node test_solutions.cjs`。
 
 `source`、`brand`、`product`、`salePrice`、`listPrice`、`piecesPerBox`、`boughtBoxes`、`giftBoxes`、`totalPieces`、`unitPrice`、`url`、`checkedAt`。
 
