@@ -58,6 +58,10 @@ function groupMetricLabel(group) {
   return metricLabel(group.products[0]);
 }
 
+function sourceCount(group) {
+  return new Set(group.products.map(product => product.source)).size;
+}
+
 function formatUnitPrice(product) {
   return isSolution(product)
     ? `NT$${product.unitPrice.toFixed(2)}`
@@ -161,7 +165,7 @@ function renderVerifiedRankings() {
     '帝康': 'ticon-aspheric-clear-daily-20',
     '星歐': 'largan-clear-daily-30'
   };
-  const groups = groupForRanking(products);
+  const groups = groupForRanking(products).filter(group => sourceCount(group) >= 3);
   $('verified-summary').textContent = '同規格・每片成本排序';
   const root = $('verified-products'); root.innerHTML = '';
   targetBrands.forEach(brand => {
@@ -175,7 +179,7 @@ function renderVerifiedRankings() {
       root.append(section);
       return;
     }
-    const siteCount = new Set(group.products.map(product => product.source)).size;
+    const siteCount = sourceCount(group);
     section.querySelector('h3').textContent = group.name;
     section.querySelector('.coverage').textContent = siteCount >= 3
       ? `已比對 ${siteCount} 個官網・顯示前三名`
@@ -188,14 +192,14 @@ function renderVerifiedRankings() {
 
 function renderLensesQueenWinners() {
   const winners = groupForRanking(products)
-    .filter(group => new Set(group.products.map(product => product.source)).size >= 3);
+    .filter(group => sourceCount(group) >= 3);
   $('lq-summary').textContent = `已完成 ${winners.length} 款品項的三站以上比價，以下直接顯示每款最便宜前三名。`;
   const root = $('lq-products'); root.innerHTML = '';
   winners.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
     section.querySelector('.comparison-name').textContent = `同規格・${groupMetricLabel(group)}成本排序`;
     section.querySelector('h3').textContent = group.name;
-    section.querySelector('.coverage').textContent = `已比對 ${new Set(group.products.map(product => product.source)).size} 個官網・顯示前三名`;
+    section.querySelector('.coverage').textContent = `已比對 ${sourceCount(group)} 個官網・顯示前三名`;
     const rankings = section.querySelector('.rankings');
     appendRankings(rankings, group.products, section.querySelector('.ranking-heading'));
     root.append(section);
@@ -211,29 +215,29 @@ function render() {
     (!query || [p.brand, p.product, p.source].join(' ').toLowerCase().includes(query)) &&
     targetBrand(p) && (!selectedBrand || targetBrand(p)?.name === selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
-  const groups = groupForRanking(filtered).sort((a, b) => {
+  const groups = groupForRanking(filtered)
+    .filter(group => sourceCount(group) >= 3)
+    .sort((a, b) => {
     const sourceDifference = new Set(b.products.map(product => product.source)).size - new Set(a.products.map(product => product.source)).size;
     return sourceDifference || a.name.localeCompare(b.name, 'zh-Hant');
-  });
+    });
   const title = selectedBrand ? `${selectedBrand} 全部已比價品項・最便宜前三名` : '熱門基本款・同規格每片成本排序';
   $('comparison-title').textContent = title;
   $('comparison-kicker').textContent = selectedBrand ? `${selectedBrand.toUpperCase()} · PRICE COMPARISON` : 'PRICE COMPARISON';
   $('comparison-description').textContent = selectedBrand
-    ? '顯示此品牌所有已收錄品項，依同系列同規格的每片成本排序；點「查看商品」可回原官網確認。'
-    : '先從九宮格選品牌可縮小結果；下方則保留所有已收錄熱門基本款的同規格價格排序。';
+    ? '只顯示至少 3 個來源都有同規格品項的比價，依每片成本排序；點「查看商品」可回原官網確認。'
+    : '只保留至少 3 個來源都有同規格品項的比價，依每片成本排序。';
   $('summary').textContent = selectedBrand
-    ? `已收錄 ${groups.length} 款 ${selectedBrand} 品項。`
-    : `已整理 ${groups.length} 款基本品項、${filtered.length} 筆公開價格資料`;
+    ? `已收錄 ${groups.length} 款符合三站比價的 ${selectedBrand} 品項。`
+    : `已整理 ${groups.length} 款符合三站比價的基本品項、${filtered.length} 筆公開價格資料`;
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
   groups.forEach(group => {
     const section = $('ranking-template').content.cloneNode(true);
     section.querySelector('.comparison-name').textContent = `同規格・${groupMetricLabel(group)}成本排序`;
     section.querySelector('h3').textContent = group.name;
-    const siteCount = new Set(group.products.map(product => product.source)).size;
-    section.querySelector('.coverage').textContent = siteCount >= 3
-      ? `已比對 ${siteCount} 個官網・顯示前三名`
-      : `已比對 ${siteCount} 個官網`;
+    const siteCount = sourceCount(group);
+    section.querySelector('.coverage').textContent = `已比對 ${siteCount} 個官網・顯示前三名`;
     const rankings = section.querySelector('.rankings');
     appendRankings(rankings, group.products, section.querySelector('.ranking-heading'));
     root.append(section);
