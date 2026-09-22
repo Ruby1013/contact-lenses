@@ -117,7 +117,6 @@ function cooperRankingModes(records) {
     ? p.salePrice / p.totalPieces : Infinity;
   const compare = (a, b) => (exactCost(a) - exactCost(b)) || (a.salePrice - b.salePrice);
   return [
-    { name: '單盒＋量販一起比', accepts: p => true },
     { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
     { name: '量販比價', accepts: p => p.boughtBoxes > 1 }
   ].map(mode => ({ name: mode.name,
