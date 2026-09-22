@@ -32,6 +32,13 @@ assert.match(vm.runInContext("formatUnitPrice({ unitPrice: 9.99 })", context), /
 console.log('PASS: Cooper single/bulk rankings use truncated integer per-piece prices.');
 
 const singles = vm.runInContext('cooperRankingModes(data.filter(p => p.comparisonKey === "cooper-oculclear-daily-30"))[0].products', context);
+const bulk = vm.runInContext('cooperRankingModes(data.filter(p => p.comparisonKey === "cooper-oculclear-daily-30"))[1].products', context);
+const moreFine = bulk.find(p => p.source === 'MoreFine');
+assert.equal(moreFine.boughtBoxes, 5);
+assert.equal(moreFine.giftBoxes, 1);
+assert.equal(moreFine.totalPieces, 180);
+assert.equal(moreFine.salePrice, 1650);
+assert.equal(bulk.filter(p => p.source === 'MoreFine').length, 1);
 assert.deepEqual(Array.from(singles.slice(0, 3), p => p.source), ['鏡后 Lenses Queen', 'OMO Lens', 'MoreFine']);
 assert.equal(singles.find(p => p.source === 'OMO Lens').salePrice, 310);
 assert.equal(singles.find(p => p.source === 'MoreFine').salePrice, 330);
