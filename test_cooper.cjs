@@ -16,6 +16,17 @@ context.offers = [
   {source:'B', comparisonKey:'x', boughtBoxes:1, salePrice:290, totalPieces:30},
 ];
 const split = vm.runInContext('cooperRankingModes(offers)', context);
+context.bulkOffers = [
+  {source:'A', comparisonKey:'bulk', boughtBoxes:2, salePrice:300, totalPieces:60},
+  {source:'A', comparisonKey:'bulk', boughtBoxes:5, giftBoxes:1, salePrice:1650, totalPieces:180},
+  {source:'A', comparisonKey:'bulk', boughtBoxes:6, salePrice:1800, totalPieces:180},
+  {source:'B', comparisonKey:'bulk', boughtBoxes:3, salePrice:600, totalPieces:90},
+];
+const largest = vm.runInContext('cooperRankingModes(bulkOffers)[1].products', context);
+assert.equal(largest.length, 2);
+assert.equal(largest.find(p => p.source === 'A').totalPieces, 180);
+assert.equal(largest.find(p => p.source === 'A').salePrice, 1650);
+assert.equal(largest[0].source, 'B'); // Select largest per shop, then rank shops by price.
 assert.equal(split[0].products.length, 2);
 assert.equal(split[0].products[0].source, 'B');
 assert.equal(split[0].products[1].boughtBoxes, 1); // Buy-one gifts remain single-box

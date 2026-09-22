@@ -119,15 +119,17 @@ function cooperRankingModes(records) {
   const exactCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
     ? p.salePrice / p.totalPieces : Infinity;
   const bestOffer = (a, b) => (exactCost(a) - exactCost(b)) || (a.salePrice - b.salePrice);
+  const quantity = p => Number.isFinite(p.totalPieces) && p.totalPieces > 0 ? p.totalPieces : 0;
+  const largestOffer = (a, b) => (quantity(b) - quantity(a)) || bestOffer(a, b);
   const truncatedCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
     ? Math.floor(p.salePrice / p.totalPieces) : Infinity;
   const compare = (a, b) => (truncatedCost(a) - truncatedCost(b)) || (a.salePrice - b.salePrice);
   return [
-    { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
-    { name: '量販比價', accepts: p => p.boughtBoxes > 1 }
+    { name: '單盒比價', accepts: p => p.boughtBoxes === 1, choose: bestOffer },
+    { name: '量販比價', accepts: p => p.boughtBoxes > 1, choose: largestOffer }
   ].map(mode => ({ name: mode.name,
-    // Choose each shop's genuinely cheapest offer before applying display-price ranking.
-    products: (groupForRanking(records.filter(mode.accepts), bestOffer)[0]?.products || []).sort(compare) }));
+    // Bulk uses each shop's largest recorded bundle, including same-product gifts.
+    products: (groupForRanking(records.filter(mode.accepts), mode.choose)[0]?.products || []).sort(compare) }));
 }
 
 function appendCooperRankings(root, group, records) {
