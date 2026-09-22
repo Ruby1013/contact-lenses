@@ -7,7 +7,9 @@ const context = vm.createContext({Intl});
 vm.runInContext(read('app.js').split('Promise.all([')[0], context);
 context.data = JSON.parse(read('products.json'));
 const modes = vm.runInContext('cooperRankingModes(data.filter(p => p.comparisonKey === "cooper-myday-daily-30"))', context);
-assert.deepEqual(Array.from(modes, m => m.products.length), [6, 3]);
+assert.deepEqual(Array.from(modes, m => m.products.length), [7, 4]);
+assert.equal(modes[0].products.find(p => p.source === 'BBLens').salePrice, 980);
+assert.equal(modes[1].products.find(p => p.source === 'BBLens').salePrice, 1660);
 assert.equal(modes[0].products[0].source, '鏡后 Lenses Queen');
 assert.equal(modes[1].products[0].source, 'OMO Lens');
 context.offers = [
