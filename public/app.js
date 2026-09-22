@@ -298,7 +298,7 @@ function render() {
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
   groups.forEach(group => {
-    if (targetBrand(group.products[0])?.name === '酷柏') {
+    if (!isSolution(group.products[0])) {
       appendCooperRankings(root, group, filtered);
       return;
     }
