@@ -91,7 +91,7 @@ function rankingComparator(a, b) {
   const checkoutDifference = (a.salePrice ?? Infinity) - (b.salePrice ?? Infinity);
   if (checkoutDifference) return checkoutDifference;
 
-  return (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity);
+  return 0;
 }
 
 function groupForRanking(records, comparator = rankingComparator) {
@@ -115,12 +115,10 @@ function groupForRanking(records, comparator = rankingComparator) {
 }
 
 function cooperRankingModes(records) {
-  const exactCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
-    ? p.salePrice / p.totalPieces : Infinity;
-  const compare = (a, b) => rankingComparator(
-    { ...a, unitPrice: exactCost(a) }, { ...b, unitPrice: exactCost(b) });
+  const truncatedCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
+    ? Math.floor(p.salePrice / p.totalPieces) : Infinity;
+  const compare = (a, b) => (truncatedCost(a) - truncatedCost(b)) || (a.salePrice - b.salePrice);
   return [
-    { name: '單盒＋量販一起比', accepts: p => true },
     { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
     { name: '量販比價', accepts: p => p.boughtBoxes > 1 }
   ].map(mode => ({ name: mode.name,
@@ -153,7 +151,7 @@ function appendCooperRankings(root, group, records) {
     cards.className = 'rankings';
     block.append(heading, cards);
     if (count) {
-      appendRankings(cards, mode.products.map(p => ({ ...p, unitPrice: p.salePrice / p.totalPieces })), heading, true);
+      appendRankings(cards, mode.products.map(p => ({ ...p, unitPrice: Math.floor(p.salePrice / p.totalPieces) })), heading);
     } else {
       const empty = document.createElement('p');
       empty.className = 'pending-source';
