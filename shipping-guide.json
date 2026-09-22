@@ -1,0 +1,15 @@
+[
+  {"name":"漾美","time":"約 5–7 個工作天到貨","fee":"NT$120","free":"滿 NT$2,000 免運","method":"宅配／全家取貨付款","note":"下單隔日起算，特殊款式與訂製商品較久；宅配限本島，偏遠地區另加 NT$100。","sources":[["配送說明","https://www.shiningeyes.com.tw/index.php?information_id=11&route=information%2Finformation"]]},
+  {"name":"鏡后","time":"約 3–5 個工作天作業","fee":"滿額出貨免運","free":"滿 NT$2,000 才出貨","method":"超商店到店","note":"下單隔日起算；官網未明確區分此時程是寄出或到貨。配送限本島、澎湖及金門的服務超商。","sources":[["運送方式","https://ieyeshining.com/運送方式/"]]},
+  {"name":"睛美","time":"約 5–7 個工作天到貨","fee":"NT$120","free":"滿 NT$2,000 免運","method":"門市取貨付款","note":"下單隔日起算，特殊款式與訂製商品較久；配送方式以實際可選門市為準。","sources":[["配送說明","https://www.funny-eyes.com/index.php?information_id=10&route=information/information"]]},
+  {"name":"BBLens","time":"依備貨與物流安排","fee":"NT$70","free":"滿 NT$1,200 免運","method":"門市／符合資格可宅配、超取","note":"官網未承諾固定到貨天數；首購須門市取貨，後續依處方及配送契約提供服務。缺度數向國外訂貨可能需 5–8 週。","sources":[["常見問題","https://www.bblens.tw/home/faq"]]},
+  {"name":"愛戴","time":"指定常備款最快當日出貨","fee":"待確認","free":"滿 NT$1,000 免運","method":"7-ELEVEN 取貨付款","note":"當日出貨限工作日中午前下單的嬌生、博士倫、愛爾康常備款，不代表當日到貨。一般運費未於此 FAQ 明列，請於結帳確認。","sources":[["隱形眼鏡 FAQ","https://ai-dai.com/Notice/QA"]]},
+  {"name":"Afternun Lab","time":"約 3–5 個工作天寄出","fee":"待確認","free":"滿 NT$1,200 免運","method":"超商／直營門市取貨","note":"不含下單當天與例假日；寄出後仍需物流配送時間。一般運費請依取貨方式於結帳確認。","sources":[["運送政策","https://www.afternunlab.com/about/delivery-policy"],["會員與免運","https://www.afternunlab.com/pages/member-rights-2"]]},
+  {"name":"MoreFine","time":"2–3 工作天寄出＋配送","fee":"待確認","free":"免運門檻待確認","method":"門市／郵寄／超商取貨","note":"寄出不含下單當天與例假日；郵寄、超商另約 2–3 個工作天配送。首次下單須門市取件，費用請向官網確認。","sources":[["運送政策","https://www.morefine-optical.com/about/delivery-policy"]]},
+  {"name":"屈臣氏","time":"依商品及到店通知","fee":"依隱眼旗艦館規則","free":"各館免運門檻不同","method":"線上預訂、門市取貨付款","note":"隱形眼鏡請查各館商品頁及專用運費規則；勿直接套用一般商品的快速到貨與免運活動。","sources":[["隱眼配送 FAQ","https://www.watsons.com.tw/myaccount-faq?category=comp_00079800&question=cmsitem_01202000%5C"]]},
+  {"name":"OMO Lens","time":"約 3–7 個工作天寄出","fee":"待確認","free":"註冊後滿 NT$1,200 免運","method":"超商取貨／門市取件","note":"寄出時間不含例假日；部分商品備貨較久，依商品頁為準。未達免運門檻的費用請於結帳確認。","sources":[["運送政策","https://www.omolens.com/zh-hant/about/delivery-policy"],["首頁免運公告","https://www.omolens.com/"]]},
+  {"name":"imeime","time":"2–3 工作天出貨＋1–3 天到店","fee":"待確認","free":"免運門檻待確認","method":"門市取貨","note":"少數品牌需 3–5 個工作天才出貨；缺貨另行確認。已查得的運費頁為海外規則，台灣運費與免運門檻請於結帳確認。","sources":[["訂購配送","https://www.imeime-cl.com/website_faq.php?category_sn=2&m2_member_sn="]]},
+  {"name":"Le'Mu Lens","time":"約 3–10 個工作天寄出","fee":"依當期免運活動","free":"商品頁標示全館免運","method":"依預訂可選取貨門市","note":"不含例假日，連假可能延後。商品頁顯示全館免運但未註明期限，是否適用請以結帳為準；取貨方式請以實際選項確認。","sources":[["運送政策","https://www.lemulens.com/about/delivery-policy"],["免運活動標示","https://www.lemulens.com/products/opt-onemonth-4"]]},
+  {"name":"博士倫官方商城","time":"約 3–5 個工作天發貨","fee":"NT$100","free":"滿 NT$1,000 免運","method":"特約眼鏡門市取貨付款","note":"訂單成立隔日起算，不含國定假日與連假；收到到貨簡訊或郵件後，再至指定門市取貨。","sources":[["如何購買","https://www.bauschonline.com.tw/pages/howtobuy"]]}
+]
+
