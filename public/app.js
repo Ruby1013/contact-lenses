@@ -97,6 +97,7 @@ function rankingComparator(a, b) {
 function groupForRanking(records, comparator = rankingComparator) {
   const groups = new Map();
   records.forEach(product => {
+    if (product.comparisonEligible === false) return;
     const key = comparisonKey(product);
     if (!groups.has(key)) groups.set(key, { key, name: comparisonName(product), products: [] });
     groups.get(key).products.push(product);

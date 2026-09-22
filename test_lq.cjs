@@ -1,0 +1,31 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const data = JSON.parse(fs.readFileSync(path.join(__dirname,'public/products.json'),'utf8'));
+const lq = data.filter(p => p.source === '鏡后 Lenses Queen');
+const find = (id, boxes=1) => lq.find(p => p.sourceProductId === id && p.boughtBoxes === boxes);
+assert.equal(lq.length,145);
+assert.equal(find('4555').salePrice,950);
+assert.equal(find('6319').salePrice,890);
+assert.equal(find('28847').salePrice,1280);
+assert.equal(find('22848').salePrice,150);
+assert.equal(find('22848',3).salePrice,450);
+assert.equal(find('22848',3).totalPieces,8);
+assert.equal(find('48031',7).salePrice,1785);
+assert.equal(find('48031',7).totalPieces,80);
+assert.equal(find('23339').totalPieces,22);
+assert.equal(find('48062',6).totalPieces,null);
+for(const p of lq) {
+  assert.match(p.checkedAt,/^2026-09-22T/);
+  assert.ok(p.url.includes('/shop/'));
+  if(p.comparisonEligible === false) continue;
+  assert.equal(p.unitPrice,p.salePrice/(p.totalVolumeMl || p.totalPieces));
+  if(!p.totalVolumeMl) assert.equal(p.totalPieces,p.piecesPerBox*(p.boughtBoxes+p.giftBoxes)+(p.giftPieces||0));
+}
+const context = vm.createContext({Intl});
+vm.runInContext(fs.readFileSync(path.join(__dirname,'public/app.js'),'utf8').split('Promise.all([')[0],context);
+context.offers=[{source:'A',comparisonKey:'x',boughtBoxes:6,salePrice:1390,totalPieces:60,comparisonEligible:false},{source:'B',comparisonKey:'x',boughtBoxes:1,salePrice:255,totalPieces:10}];
+assert.equal(vm.runInContext('groupForRanking(offers)[0].products.length',context),1);
+assert.equal(vm.runInContext('cooperRankingModes(offers)[1].products.length',context),0);
+console.log('PASS: Lenses Queen current prices, paid/gift thresholds, dates, and exclusion of unconfirmed specifications.');
