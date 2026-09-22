@@ -31,6 +31,7 @@ function renderBrandGrid() {
 
 function selectBrand(name) {
   selectedBrand = name;
+  if (name) document.querySelector('#shipping-guide .shipping-all').open = false;
   renderBrandGrid();
   $('verified-ranking').hidden = true;
   $('lq-winners').hidden = true;
