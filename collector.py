@@ -30,7 +30,10 @@ SOURCES = {
     "ai-dai.com": "愛戴 AIDAI",
     "www.ai-dai.com": "愛戴 AIDAI",
     "www.afternunlab.com": "Afternun Lab",
-    "www.morefine-optical.com": "MoreFine Optical",
+    "www.morefine-optical.com": "MoreFine",
+    "morefine-optical.com": "MoreFine",
+    "www.omolens.com": "OMO Lens",
+    "omolens.com": "OMO Lens",
     "www.watsons.com.tw": "屈臣氏 Watsons",
 }
 
@@ -175,9 +178,14 @@ def extract(url: str) -> dict:
 
 def merge_record(products: list[dict], record: dict, comparison_key: str | None = None) -> list[dict]:
     matches = [product for product in products if product["url"] == record["url"]]
-    if len(matches) > 1:
+    if len({p.get("comparisonKey") for p in matches}) > 1:
         raise ValueError("This URL represents multiple products; use a specific product page instead.")
-    previous = matches[0] if matches else {}
+    def offer_key(p):
+        return (p.get("boughtBoxes", 1), p.get("giftBoxes", 0), p.get("totalPieces"))
+    same_offer = [p for p in matches if offer_key(p) == offer_key(record)]
+    if len(same_offer) > 1:
+        raise ValueError("Ambiguous offers; review this product page before saving.")
+    previous = same_offer[0] if same_offer else {}
     key = comparison_key or previous.get("comparisonKey")
     if not key:
         raise ValueError("A comparison key is required; pass --comparison-key for a verified matching group.")
@@ -189,7 +197,8 @@ def merge_record(products: list[dict], record: dict, comparison_key: str | None 
     if record["piecesPerBox"] != group.get("piecesPerBox"):
         raise ValueError("Package size differs from the comparison group; review before saving.")
     record = {**record, "comparisonKey": key, "comparisonName": group["comparisonName"]}
-    return [product for product in products if product["url"] != record["url"]] + [record]
+    return [product for product in products if not
+            (product["url"] == record["url"] and offer_key(product) == offer_key(record))] + [record]
 
 
 def main() -> int:

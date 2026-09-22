@@ -37,6 +37,14 @@ class CollectionGroupingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             merge_record([self.old], self.new, "typo")
 
+    def test_single_and_bulk_same_url_survive_refresh(self):
+        bulk = {**self.old, "boughtBoxes": 4, "totalPieces": 120, "salePrice": 1120}
+        single = {**self.new, "boughtBoxes": 1, "salePrice": 310}
+        result = merge_record([bulk], single, "myday-30")
+        self.assertEqual(len(result), 2)
+        result = merge_record(result, {**single, "salePrice": 300})
+        self.assertEqual(sorted(p["salePrice"] for p in result), [300, 1120])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -52,7 +52,9 @@ function isSolution(product) {
 }
 
 function normalizeProduct(product) {
-  if (!isSolution(product)) return product;
+  if (!isSolution(product)) return { ...product,
+    unitPrice: Number.isFinite(product.salePrice) && product.totalPieces > 0
+      ? product.salePrice / product.totalPieces : null };
   const totalVolumeMl = product.totalVolumeMl ??
     product.volumeMl * ((product.boughtBoxes ?? 1) + (product.giftBoxes ?? 0));
   return { ...product, totalVolumeMl,
@@ -115,7 +117,8 @@ function groupForRanking(records, comparator = rankingComparator) {
 function cooperRankingModes(records) {
   const exactCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
     ? p.salePrice / p.totalPieces : Infinity;
-  const compare = (a, b) => (exactCost(a) - exactCost(b)) || (a.salePrice - b.salePrice);
+  const compare = (a, b) => rankingComparator(
+    { ...a, unitPrice: exactCost(a) }, { ...b, unitPrice: exactCost(b) });
   return [
     { name: '單盒＋量販一起比', accepts: p => true },
     { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
@@ -131,7 +134,7 @@ function appendCooperRankings(root, group, records) {
   title.textContent = group.name;
   const note = document.createElement('p');
   note.className = 'cooper-note';
-  note.textContent = '依實際每片成本排名；單盒含買 1 盒附贈，量販需買 2 盒以上。各榜每家取最便宜方案，不足 3 家照實列出。';
+  note.textContent = '每片價格無條件捨去至整數，同價以總價低者優先；單盒含買 1 盒附贈，量販需買 2 盒以上，隨機贈片不計。各榜每家取最便宜方案，不足 3 家照實列出。';
   section.append(title, note);
   // Split the raw offers before choosing each shop's cheapest offer.
   cooperRankingModes(records.filter(p => comparisonKey(p) === group.key)).forEach(mode => {
