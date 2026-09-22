@@ -317,12 +317,18 @@ function render() {
   });
 }
 
+function applyAidaiUpdate(data, update) {
+  const keys = new Set(update.replacedComparisonKeys);
+  return data.filter(p => !(p.source === '愛戴' && keys.has(p.comparisonKey))).concat(update.offers);
+}
+
 Promise.all([
   fetch('products.json').then(response => response.json()),
   fetch('target_brands.json').then(response => response.json()),
-  fetch('source-sites.json').then(response => response.json())
-]).then(([data, brands, sites]) => {
-  products = data.map(normalizeProduct); targetBrands = brands; sourceSites = sites;
+  fetch('source-sites.json').then(response => response.json()),
+  fetch('aidai-offers.json').then(response => { if (!response.ok) throw new Error('愛戴資料載入失敗'); return response.json(); })
+]).then(([data, brands, sites, aidai]) => {
+  products = applyAidaiUpdate(data, aidai).map(normalizeProduct); targetBrands = brands; sourceSites = sites;
   $('brand-picker').after($('comparison'));
   $('comparison').querySelector('.comparison-heading').hidden = true;
   [...new Set(products.map(p => p.source))].sort().forEach(name => $('source').add(new Option(name, name)));

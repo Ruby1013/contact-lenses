@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>愛戴完整商品價格｜LensPrice</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    main{max-width:1500px;margin:auto;padding:24px}.catalog-controls{display:flex;gap:16px;flex-wrap:wrap;margin:24px 0}.catalog-controls label{display:grid;gap:6px;flex:1;min-width:180px}.table-scroll{overflow:auto;background:white;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;min-width:950px}th,td{padding:14px;text-align:left;border-bottom:1px solid var(--line)}th{background:#eaf3ee}td.money{text-align:right;white-space:nowrap}th:nth-child(2){min-width:340px}td:nth-child(5){min-width:160px}tbody tr:hover{background:#f4f8f5}h1{font-size:clamp(1.7rem,4vw,2.6rem)}a{color:var(--green)}
+  </style>
+  <script src="aidai.js" defer></script>
+</head>
+<body><main>
+  <a href="index.html">返回比價首頁</a>
+  <h1>愛戴完整商品價格</h1>
+  <p>2026/09/22 核對，涵蓋全部 32 頁、628 個品項及 47 個品牌。</p>
+  <p>售價為列表標示金額，包裝規格見品名。多盒優惠另列，未將平均盒價當作單盒價。活動與售價請以商品頁及結帳為準。</p>
+  <p><a href="aidai-prices-2026-09-22.xlsx" download>下載愛戴完整 Excel 價格表</a> · <a href="https://ai-dai.com/Product/List?cg=%E9%9A%B1%E5%BD%A2%E7%9C%BC%E9%8F%A1" target="_blank" rel="noopener noreferrer">查看愛戴官網</a></p>
+  <div class="catalog-controls">
+    <label>搜尋商品<input id="query" type="search" placeholder="品牌、系列、色款或包裝"></label>
+    <label>品牌<select id="brand"><option value="">全部品牌</option></select></label>
+    <label>排序<select id="sort"><option value="default">網站原始順序</option><option value="asc">標示售價由低到高</option><option value="desc">標示售價由高到低</option></select></label>
+  </div>
+  <p id="count" role="status">載入中…</p>
+  <div class="table-scroll"><table><thead><tr><th scope="col">品牌</th><th scope="col">商品／包裝規格</th><th scope="col">售價（NT$）</th><th scope="col">原價（NT$）</th><th scope="col">優惠／標籤原文</th><th scope="col">商品頁</th></tr></thead><tbody id="catalog"></tbody></table></div>
+</main></body></html>
