@@ -22,4 +22,11 @@ assert.equal(split[0].products[1].boughtBoxes, 1); // Buy-one gifts remain singl
 assert.equal(split[1].products.length, 1);
 assert.equal(split[1].products[0].boughtBoxes, 4);
 assert.equal(vm.runInContext('cooperRankingModes([offers[0]])[1].products.length', context), 0);
-console.log('PASS: Cooper single/bulk rankings, same-shop offers, gifts, precise costs and empty groups.');
+context.tieOffers = [
+  {source:'Higher exact cost but lower checkout', comparisonKey:'tie', boughtBoxes:1, salePrice:310, totalPieces:30},
+  {source:'Lower exact cost but higher checkout', comparisonKey:'tie', boughtBoxes:1, salePrice:600, totalPieces:60},
+];
+const tied = vm.runInContext('cooperRankingModes(tieOffers)', context);
+assert.equal(tied[0].products[0].source, 'Higher exact cost but lower checkout');
+assert.match(vm.runInContext("formatUnitPrice({ unitPrice: 9.99 })", context), /9$/);
+console.log('PASS: Cooper single/bulk rankings use truncated integer per-piece prices.');
