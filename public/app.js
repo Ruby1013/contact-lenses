@@ -130,10 +130,7 @@ function appendCooperRankings(root, group, records) {
   section.className = 'ranking-group cooper-group';
   const title = document.createElement('h3');
   title.textContent = group.name;
-  const note = document.createElement('p');
-  note.className = 'cooper-note';
-  note.textContent = '每片價格無條件捨去至整數，同價以總價低者優先；單盒含買 1 盒附贈，量販需買 2 盒以上，隨機贈片不計。各榜每家取最便宜方案，不足 3 家照實列出。';
-  section.append(title, note);
+  section.append(title);
   // Split the raw offers before choosing each shop's cheapest offer.
   cooperRankingModes(records.filter(p => comparisonKey(p) === group.key)).forEach(mode => {
     const block = document.createElement('section');
