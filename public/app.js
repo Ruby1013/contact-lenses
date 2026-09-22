@@ -89,7 +89,7 @@ function rankingComparator(a, b) {
   const checkoutDifference = (a.salePrice ?? Infinity) - (b.salePrice ?? Infinity);
   if (checkoutDifference) return checkoutDifference;
 
-  return (a.unitPrice ?? Infinity) - (b.unitPrice ?? Infinity);
+  return 0;
 }
 
 function groupForRanking(records, comparator = rankingComparator) {
@@ -113,9 +113,9 @@ function groupForRanking(records, comparator = rankingComparator) {
 }
 
 function cooperRankingModes(records) {
-  const exactCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
-    ? p.salePrice / p.totalPieces : Infinity;
-  const compare = (a, b) => (exactCost(a) - exactCost(b)) || (a.salePrice - b.salePrice);
+  const truncatedCost = p => Number.isFinite(p.salePrice) && p.totalPieces > 0
+    ? Math.floor(p.salePrice / p.totalPieces) : Infinity;
+  const compare = (a, b) => (truncatedCost(a) - truncatedCost(b)) || (a.salePrice - b.salePrice);
   return [
     { name: '單盒比價', accepts: p => p.boughtBoxes === 1 },
     { name: '量販比價', accepts: p => p.boughtBoxes > 1 }
@@ -130,7 +130,7 @@ function appendCooperRankings(root, group, records) {
   title.textContent = group.name;
   const note = document.createElement('p');
   note.className = 'cooper-note';
-  note.textContent = '依實際每片成本排名；單盒含買 1 盒附贈，量販需買 2 盒以上。各榜每家取最便宜方案，不足 3 家照實列出。';
+  note.textContent = '每片價格一律無條件捨去至整數後排名；單盒含買 1 盒附贈，量販需買 2 盒以上。各榜每家取最便宜方案，不足 3 家照實列出。';
   section.append(title, note);
   // Split the raw offers before choosing each shop's cheapest offer.
   cooperRankingModes(records.filter(p => comparisonKey(p) === group.key)).forEach(mode => {
@@ -149,7 +149,7 @@ function appendCooperRankings(root, group, records) {
     cards.className = 'rankings';
     block.append(heading, cards);
     if (count) {
-      appendRankings(cards, mode.products.map(p => ({ ...p, unitPrice: p.salePrice / p.totalPieces })), heading, true);
+      appendRankings(cards, mode.products.map(p => ({ ...p, unitPrice: Math.floor(p.salePrice / p.totalPieces) })), heading);
     } else {
       const empty = document.createElement('p');
       empty.className = 'pending-source';
