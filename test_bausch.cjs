@@ -13,5 +13,5 @@ assert.equal(context.selectCatalog(rows,'不存在的花色','','default').lengt
 assert.equal(context.selectCatalog(rows,'','','asc')[0].price,130);
 assert.equal(context.selectCatalog(rows,'','','desc')[0].price,350);
 assert.ok(read('index.html').includes('href="bausch.html"'));
-assert.ok(fs.existsSync(path.join(__dirname,'public/bausch-prices-2026-09-22.xlsx')));
+assert.ok(fs.existsSync(path.join(__dirname,'public/bausch-prices-2026-09-23.xlsx')));
 console.log('PASS: 37 official prices, package calculations, search, type filters, sorting and download.');
