@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-09-23T14:39:03+08:00",
+  "pages": 32,
+  "beforeCount": 628,
+  "afterCount": 628,
+  "changes": [
+    {
+      "id": "2918",
+      "name": "睿視能矽水膠清透日拋30片裝",
+      "url": "https://ai-dai.com/Product/View?id=2918",
+      "changes": {
+        "promotion": {
+          "before": "第2盒6折；大送小(9/28前)",
+          "after": "第2盒6折"
+        },
+        "name": {
+          "before": "睿視能矽水膠清透日拋30片裝_ (9/28前 加碼優惠：透明日拋 大送小)",
+          "after": "睿視能矽水膠清透日拋30片裝"
+        }
+      }
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "detailPagesChecked": 186,
+  "detailChanges": []
+}
