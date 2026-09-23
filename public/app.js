@@ -324,7 +324,7 @@ function applyAidaiUpdate(data, update) {
 }
 
 Promise.all([
-  fetch('products.json').then(response => response.json()),
+  fetch('products.json?v=funnyeyes-20260923').then(response => response.json()),
   fetch('target_brands.json').then(response => response.json()),
   fetch('source-sites.json').then(response => response.json()),
   fetch('aidai-offers.json').then(response => { if (!response.ok) throw new Error('愛戴資料載入失敗'); return response.json(); })
