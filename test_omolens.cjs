@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const catalog=JSON.parse(fs.readFileSync('public/omolens-catalog.json','utf8'));
 const offers=JSON.parse(fs.readFileSync('public/products.json','utf8')).filter(p=>p.source==='OMO Lens');
-assert.equal(catalog.length,349);assert.equal(new Set(catalog.map(p=>p.id)).size,349);
+assert.equal(catalog.length,348);assert.equal(new Set(catalog.map(p=>p.id)).size,348);
 assert.equal(catalog.filter(p=>p.soldOut).length,12);
 for(const p of offers){
  const c=catalog.find(c=>c.id===p.sourceProductId);assert.ok(c);assert.equal(p.url,c.url);
@@ -28,3 +28,8 @@ assert.equal(context.selectCatalog(catalog,'','desc')[0].price,7280);
 assert.ok(context.selectCatalog(catalog,'超涵水透明日拋30','default').length>0);
 assert.equal(context.selectCatalog(catalog,'不存在的商品','default').length,0);
 console.log('PASS: complete catalog, single/bulk prices, gifts, liquid volume, sold-out labels, search and sorting.');
+
+assert.equal(catalog.find(p=>p.id==="69fd69a2827b984c74e017db").price,899);
+assert.equal(catalog.find(p=>p.id==="69fd69a2827b984c74e017db").promo,"2盒只要$1438");
+assert.ok(!catalog.some(p=>p.id==="690b95b751acbf000e2f01b1"));
+assert.ok([...catalog,...offers].every(p=>p.checkedAt.startsWith("2026-09-23")));
