@@ -15,7 +15,7 @@ for (const p of update.offers) {
   assert.ok(q); assert.equal(p.url, q.url); assert.equal(p.product, q.name);
   assert.ok(p.salePrice > 0); assert.equal(p.unitPrice, p.salePrice / p.totalPieces);
   assert.equal(p.totalPieces, p.piecesPerBox * (p.boughtBoxes + p.giftBoxes));
-  assert.match(p.checkedAt, /^2026-09-22/);
+  assert.match(p.checkedAt, /^2026-09-23/);
   if (p.boughtBoxes === 1) assert.equal(p.salePrice, p.sourceProductId === '1406' ? 130 : q.price);
 }
 const offer = (id, bought) => update.offers.find(p => p.sourceProductId === id && p.boughtBoxes === bought);
@@ -53,3 +53,6 @@ assert.ok(filtered.length >= 4);
 assert.ok(filtered.every((p, i) => !i || filtered[i - 1].price <= p.price));
 assert.equal(catalog[0].id, '2766'); // Sorting must not mutate source order.
 console.log('PASS: 628 products, reviewed offer arithmetic, stale-offer replacement, retailer preservation, search and sort.');
+
+assert.equal(catalog.find(p => p.id === '2918').promotion, '第2盒6折');
+assert.equal(catalog.find(p => p.id === '2918').name, '睿視能矽水膠清透日拋30片裝');
