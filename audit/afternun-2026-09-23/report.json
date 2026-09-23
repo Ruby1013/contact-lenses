@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-09-23T14:39:12+08:00",
+  "previousCount": 222,
+  "currentCount": 222,
+  "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "changes": [],
+  "added": [],
+  "removed": [],
+  "menuAdded": [],
+  "menuRemoved": [],
+  "verifiedPromotions": [
+    {
+      "url": "https://www.afternunlab.com/promotions/2for899",
+      "offer": "指定商品：任選 2 件 NT$899 元，買越多省越多！\"},\"condition_scope\":\"discounted_products\",\"id\":\"68f1adfd5d36d0000a3ac876\"});",
+      "expectedPackPresent": true,
+      "expectedPricePresent": true
+    },
+    {
+      "url": "https://www.afternunlab.com/promotions/ticon-the-moment-daily-2for699",
+      "offer": "指定商品：任選 2 件 NT$699 元，買越多省越多！\"},\"condition_scope\":\"discounted_products\",\"id\":\"697c416f4c786064d62091a4\"});",
+      "expectedPackPresent": true,
+      "expectedPricePresent": true
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const read=n=>JSON.parse(fs.readFileSync(path.join(__dirname,n),'utf8'));
-const catalog=read('public/afternun-catalog.json'),data=read('public/products.json'),before=read('audit/afternun-2026-09-22/before.json');
+const catalog=read('public/afternun-catalog.json'),data=read('public/products.json'),before=read('audit/afternun-2026-09-23/before.json');
 assert.equal(catalog.length,222);assert.equal(new Set(catalog.map(p=>p.id)).size,222);
 assert.deepEqual(data.filter(p=>p.source!=='Afternun Lab'),before.filter(p=>p.source!=='Afternun Lab'));
 const offers=data.filter(p=>p.source==='Afternun Lab');assert.equal(offers.length,10);
-for(const p of offers){const q=catalog.find(q=>q.id===p.sourceProductId);assert.equal(p.url,q.url);assert.equal(p.totalPieces,p.piecesPerBox*p.boughtBoxes);assert.equal(p.unitPrice,p.salePrice/p.totalPieces);assert.match(p.checkedAt,/^2026-09-22/);if(p.boughtBoxes===1)assert.equal(p.salePrice,q.price);}
+for(const p of offers){const q=catalog.find(q=>q.id===p.sourceProductId);assert.equal(p.url,q.url);assert.equal(p.totalPieces,p.piecesPerBox*p.boughtBoxes);assert.equal(p.unitPrice,p.salePrice/p.totalPieces);assert.match(p.checkedAt,/^2026-09-23/);if(p.boughtBoxes===1)assert.equal(p.salePrice,q.price);}
 const find=(key,boxes,pieces)=>offers.find(p=>p.comparisonKey===key&&p.boughtBoxes===boxes&&(!pieces||p.piecesPerBox===pieces));
 assert.match(find('ticon-55-biweekly-6',1).url,/ticon-2-weeks-2$/);
 assert.equal(find('ticon-premium-oxygen-daily',2).totalPieces,40);assert.equal(find('ticon-premium-oxygen-daily',2).salePrice,899);
@@ -16,5 +16,5 @@ assert.equal(ctx.selectCatalog(catalog,'','LENS++ 永暘光學').length,10);
 assert.equal(ctx.selectCatalog(catalog,'0元')[0].price,999);
 assert.equal(ctx.selectCatalog(catalog,'','','asc')[0].price,59);
 assert.equal(ctx.selectCatalog(catalog,'','','desc')[0].price,1200);
-assert.ok(fs.readFileSync(path.join(__dirname,'public/afternun-prices-2026-09-22.xlsx')).subarray(0,2).equals(Buffer.from('PK')));
+assert.ok(fs.readFileSync(path.join(__dirname,'public/afternun-prices-2026-09-23.xlsx')).subarray(0,2).equals(Buffer.from('PK')));
 console.log('PASS: 222 catalog items, 10 reviewed offers, correct promotion packs, other retailers unchanged, search/filter/sort and Excel.');
