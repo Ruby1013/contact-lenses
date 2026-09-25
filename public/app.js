@@ -127,7 +127,7 @@ function spreadsheetRankingModes(records) {
 function appendSpreadsheetRankings(root, group, records) {
   const section=document.createElement('section');section.className='ranking-group spreadsheet-group';
   const title=document.createElement('h3');title.textContent=group.name;section.append(title);
-  spreadsheetRankingModes(records.filter(p=>comparisonKey(p)===group.key)).forEach(mode=>{
+  spreadsheetRankingModes(records.filter(p=>comparisonKey(p)===group.key)).filter(mode=>mode.products.length>=2).forEach(mode=>{
     const block=document.createElement('section');block.className='purchase-ranking';
     const heading=document.createElement('div');heading.className='ranking-heading';
     const label=document.createElement('h4');label.textContent=mode.name;
@@ -394,7 +394,7 @@ Promise.all([
   fetch('target_brands.json').then(response => response.json()),
   fetch('source-sites.json').then(response => response.json()),
   fetch('aidai-offers.json').then(response => { if (!response.ok) throw new Error('愛戴資料載入失敗'); return response.json(); }),
-  fetch('brand-rankings.json?v=20260924-brands-1').then(response=>{if(!response.ok)throw new Error('新增品牌資料載入失敗');return response.json();})
+  fetch('brand-rankings.json?v=20260925-queen-scope-1').then(response=>{if(!response.ok)throw new Error('新增品牌資料載入失敗');return response.json();})
 ]).then(([data, brands, sites, aidai, additional]) => {
   supplementalBrands=additional.brands;minimumBrandItems=additional.minimumBrandItems;
   products = applyAidaiUpdate(data, aidai).concat(additional.offers).map(normalizeProduct); targetBrands = brands; sourceSites = sites;

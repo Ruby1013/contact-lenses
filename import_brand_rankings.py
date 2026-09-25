@@ -12,9 +12,11 @@ for o in data['offers']:
 coverage=collections.defaultdict(set)
 for o in offers:coverage[(o['comparisonKey'],o['purchaseMode'])].add(o['source'])
 keys={key for (key,mode),shops in coverage.items() if len(shops)>=2}
-offers=[o for o in offers if o['comparisonKey'] in keys]
+scope=json.loads((root/'queen-product-scope.json').read_text(encoding='utf-8'))
+offers=[o for o in offers if o['comparisonKey'] in keys and o['comparisonName'] in scope.get(o['purchaseMode'],[])]
 brands=collections.defaultdict(set)
 for o in offers:brands[o['brand']].add(o['comparisonKey'])
-payload={'version':'20260924-brands-1','sourceDates':['2026-09-22','2026-09-23'],'minimumBrandItems':3,'offers':offers,'brands':[{'name':b,'aliases':[b],'supplemental':True,'itemCount':len(keys)} for b,keys in sorted(brands.items())]}
+payload={'version':'20260925-queen-scope-1','sourceDates':['2026-09-22','2026-09-23'],'minimumBrandItems':3,'offers':offers,'brands':[{'name':b,'aliases':[b],'supplemental':True,'itemCount':len(keys)} for b,keys in sorted(brands.items())]}
 (root/'public/brand-rankings.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print(json.dumps({'offers':len(offers),'groups':len(keys),'brands':{b:len(k) for b,k in brands.items()}},ensure_ascii=False))
+
