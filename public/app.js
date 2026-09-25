@@ -48,7 +48,7 @@ function renderBrandGrid() {
   [...visible, ...(other.length ? [{name:'其他', itemCount:other.reduce((sum,b)=>sum+b.itemCount,0)}] : [])].forEach(brand => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'brand-button';
     const title = document.createElement('span'); title.textContent = brand.name;
-    const count = document.createElement('small'); count.textContent = brand.name === '其他' ? `${other.length} 個品牌・${brand.itemCount} 款可比價` : `${brand.itemCount} 款可比價品項`;
+    const count = document.createElement('small'); count.textContent = brand.name === '其他' ? `${other.length} 個品牌・${brand.itemCount} 款商品` : `${brand.itemCount} 款商品`;
     button.append(title,count);button.addEventListener('click',()=>selectBrand(brand.name));extra.append(button);
   });
   const filters = $('other-brand-filters'); filters.innerHTML = ''; filters.hidden = selectedBrand !== '其他';
@@ -57,7 +57,7 @@ function renderBrandGrid() {
     button.textContent=`${brand.name} (${brand.itemCount})`;button.addEventListener('click',()=>selectBrand(brand.name));filters.append(button);
   });
   const note=$('selected-brand-note');
-  if(selectedBrand === '其他') note.textContent='收錄少於 3 款可比價品項的品牌。可直接選擇下方品牌。';
+  if(selectedBrand === '其他') note.textContent='收錄少於 3 款商品的品牌。可直接選擇下方品牌。';
   else if(supplementalBrands.some(b=>b.name===selectedBrand)) note.textContent='單販、量販分開排名，以每盒均價比較。資料日期：2026/09/22–09/23。';
 }
 
@@ -97,7 +97,7 @@ function normalizeProduct(product) {
 }
 
 function metricLabel(product) {
-  if (product.rankingBasis === 'box') return '每盒';
+  if (product.rankingBasis === 'box') return `每${product.unitLabel || '盒'}`;
   return isSolution(product) ? '每毫升' : '每片';
 }
 
@@ -120,23 +120,23 @@ function spreadsheetRankingModes(records) {
   const compare=(a,b)=>(a.salePrice/a.receivedBoxes-b.salePrice/b.receivedBoxes)||(a.salePrice-b.salePrice);
   return ['單販','量販'].map(kind=>{
     const rows=groupForRanking(records.filter(p=>p.purchaseMode===kind),compare)[0]?.products||[];
-    return {name:kind==='單販'?'單販比價':'量販比價',products:rows.map(p=>({...p,priceRank:1+rows.filter(other=>Math.round(other.unitPrice*1e6)<Math.round(p.unitPrice*1e6)).length}))};
+    return {name:kind==='單販'?'單販比價':'量販比價',status:records[0]?.modeStatuses?.[kind],products:rows.map(p=>({...p,priceRank:Object.hasOwn(p,'priceRank')?p.priceRank:1+rows.filter(other=>Math.round(other.unitPrice*1e6)<Math.round(p.unitPrice*1e6)).length}))};
   });
 }
 
 function appendSpreadsheetRankings(root, group, records) {
   const section=document.createElement('section');section.className='ranking-group spreadsheet-group';
   const title=document.createElement('h3');title.textContent=group.name;section.append(title);
-  spreadsheetRankingModes(records.filter(p=>comparisonKey(p)===group.key)).filter(mode=>mode.products.length>=2).forEach(mode=>{
+  spreadsheetRankingModes(records.filter(p=>comparisonKey(p)===group.key)).forEach(mode=>{
     const block=document.createElement('section');block.className='purchase-ranking';
     const heading=document.createElement('div');heading.className='ranking-heading';
     const label=document.createElement('h4');label.textContent=mode.name;
     const coverage=document.createElement('p');coverage.className='coverage';
-    coverage.textContent=mode.products.length>=2?`${mode.products.length} 家・每盒均價由低到高`:'不足 2 家，暫不排名';
+    coverage.textContent=mode.products.length>=2?`前三名與鏡后報價・${metricLabel(mode.products[0])}均價由低到高`:(mode.status || '目前篩選條件下無可比較報價');
     heading.append(label,coverage);block.append(heading);
     const cards=document.createElement('div');cards.className='rankings';block.append(cards);
-    if(mode.products.length>=2) appendRankings(cards,mode.products,heading,true);
-    else {const p=document.createElement('p');p.className='pending-source';p.textContent='目前沒有足夠的同規格跨店報價。';cards.append(p);}
+    if(mode.products.length) mode.products.forEach((p,i)=>appendProductCard(cards,p,i+1,p.priceRank == null ? '鏡后報價・不排名' : null,true));
+    else {const p=document.createElement('p');p.className='pending-source';p.textContent=mode.status || '目前篩選條件下未收錄此類方案。';cards.append(p);}
     section.append(block);
   });root.append(section);
 }
@@ -236,7 +236,7 @@ function appendProductCard(root, product, rank, rankLabel, precise = false) {
   card.querySelector('.offer').textContent = isSolution(product)
     ? `${product.volumeMl ? `${product.volumeMl} ML／瓶・` : ''}總容量 ${product.totalVolumeMl || '?'} ML${product.note ? `・${product.note}` : ''}`
     : `${product.piecesPerBox || '?'} 片／盒・買 ${product.boughtBoxes} 盒${product.giftBoxes ? `・送 ${product.giftBoxes} 盒` : ''}${product.note ? `・${product.note}` : ''}`;
-  if(product.rankingBasis==='box') card.querySelector('.offer').textContent=`${product.piecesPerBox} 片／盒・到貨 ${product.receivedBoxes} 盒（含已計入贈盒）・${product.note}`;
+  if(product.rankingBasis==='box') card.querySelector('.offer').textContent=`${product.piecesPerBox ? `${product.piecesPerBox} 片／盒・` : ""}到貨 ${product.receivedBoxes} ${product.unitLabel || "盒"}・${product.note}`;
   card.querySelector('.prices strong').textContent = money.format(product.salePrice);
   card.querySelector('.prices span').textContent = product.listPrice ? `原價 ${money.format(product.listPrice)}` : '';
   card.querySelector('.unit').textContent = product.unitPrice ? `${metricLabel(product)}約 ${precise ? `NT$${product.unitPrice.toFixed(2)}` : formatUnitPrice(product)}` : isSolution(product) ? '缺少容量，無法換算' : '缺少片數，無法換算';
@@ -347,7 +347,7 @@ function render() {
     matchesBrand(p, selectedBrand))
     .sort((a, b) => field === 'checkedAt' ? b[field].localeCompare(a[field]) : (a[field] ?? Infinity) - (b[field] ?? Infinity));
   const groups = groupForRanking(filtered)
-    .filter(group => group.products[0]?.rankingBasis==='box' ? spreadsheetRankingModes(filtered.filter(p=>comparisonKey(p)===group.key)).some(m=>m.products.length>=2) : sourceCount(group) >= 3)
+    .filter(group => group.products[0]?.rankingBasis==='box' ? true : sourceCount(group) >= 3)
     .sort((a, b) => {
     const sourceDifference = new Set(b.products.map(product => product.source)).size - new Set(a.products.map(product => product.source)).size;
     return sourceDifference || a.name.localeCompare(b.name, 'zh-Hant');
@@ -362,8 +362,9 @@ function render() {
     ? `已收錄 ${groups.length} 款符合三站比價的 ${selectedBrand} 品項。`
     : `已整理 ${groups.length} 款符合三站比價的基本品項、${filtered.length} 筆公開價格資料`;
   if(filtered.some(p=>p.rankingBasis==='box')) {
-    $('comparison-description').textContent='單販與量販分開比較。新增品牌依同系列、週期及包裝規格，以每盒均價排序；花色與購買限制請見原品名。';
-    $('summary').textContent=`${selectedBrand || '全部品牌'}：${groups.length} 款可比價品項。新增品牌每個子榜至少收錄 2 家；原有品牌沿用既有比價規則。`;
+    $('comparison-title').textContent=`${selectedBrand || '全部品牌'}・商品與單販／量販報價`;
+    $('comparison-description').textContent='依鏡后完整價格表收錄商品。單販、量販分開顯示前三名與鏡后報價；只有鏡后報價或規格待確認的商品保留價格、不排名。';
+    $('summary').textContent=`${selectedBrand || '全部品牌'}：${groups.length} 款商品。新增品牌保留鏡后完整 54 項商品；未收錄的方案另行標示。`;
   }
   const root = $('products'); root.innerHTML = '';
   $('empty-state').hidden = groups.length !== 0;
@@ -394,7 +395,7 @@ Promise.all([
   fetch('target_brands.json').then(response => response.json()),
   fetch('source-sites.json').then(response => response.json()),
   fetch('aidai-offers.json').then(response => { if (!response.ok) throw new Error('愛戴資料載入失敗'); return response.json(); }),
-  fetch('brand-rankings.json?v=20260925-queen-scope-1').then(response=>{if(!response.ok)throw new Error('新增品牌資料載入失敗');return response.json();})
+  fetch('brand-rankings.json?v=20260925-queen-complete-1').then(response=>{if(!response.ok)throw new Error('新增品牌資料載入失敗');return response.json();})
 ]).then(([data, brands, sites, aidai, additional]) => {
   supplementalBrands=additional.brands;minimumBrandItems=additional.minimumBrandItems;
   products = applyAidaiUpdate(data, aidai).concat(additional.offers).map(normalizeProduct); targetBrands = brands; sourceSites = sites;

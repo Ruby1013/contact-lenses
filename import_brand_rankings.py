@@ -1,22 +1,16 @@
-"""Import reviewed September 22–23 workbook quotes without replacing existing prices."""
-import json,hashlib,pathlib,collections,sys
-root=pathlib.Path(__file__).parent
-data=json.loads(pathlib.Path(sys.argv[1] if len(sys.argv)>1 else root.parent/'prepared.json').read_text(encoding='utf-8'))
-records={r['id']:r for r in data['records']}
-shops={'AIDAI':'愛戴','afternoon':'Afternun Lab','LeMu萊沐':"Le'Mu Lens",'OMOLENS':'OMO Lens','模範眼鏡':'MoreFine','鏡后':'鏡后 Lenses Queen'}
-offers=[]
-for o in data['offers']:
- r=records[o['r']]
- if o['issue'] or not r['pieces'] or not r['url'].startswith('https://'):continue
- offers.append(dict(source=shops.get(o['shop'],o['shop']),brand=r['brand'],product=r['name'],salePrice=o['total'],piecesPerBox=r['pieces'],boughtBoxes=o['qty'],giftBoxes=0,totalPieces=r['pieces']*o['qty'],unitPrice=o['total']/o['qty'],url=r['url'],checkedAt='2026-09-23' if r['shop']=='鏡后' else '2026-09-22',comparisonKey='sheet-'+hashlib.sha256(o['group'].encode()).hexdigest()[:16],comparisonName=o['group'],rankingBasis='box',purchaseMode=o['kind'],receivedBoxes=o['qty'],note='；'.join(x for x in [o['condition'],r['note'],'同系列花色可能不同，詳見原品名；未另扣會員／結帳折扣及運費'] if x),sourceRecord=f"{r['file']}／{r['sheet']}!第{r['row']}列"))
-coverage=collections.defaultdict(set)
-for o in offers:coverage[(o['comparisonKey'],o['purchaseMode'])].add(o['source'])
-keys={key for (key,mode),shops in coverage.items() if len(shops)>=2}
-scope=json.loads((root/'queen-product-scope.json').read_text(encoding='utf-8'))
-offers=[o for o in offers if o['comparisonKey'] in keys and o['comparisonName'] in scope.get(o['purchaseMode'],[])]
-brands=collections.defaultdict(set)
-for o in offers:brands[o['brand']].add(o['comparisonKey'])
-payload={'version':'20260925-queen-scope-1','sourceDates':['2026-09-22','2026-09-23'],'minimumBrandItems':3,'offers':offers,'brands':[{'name':b,'aliases':[b],'supplemental':True,'itemCount':len(keys)} for b,keys in sorted(brands.items())]}
+"""Build supplemental listings from the reviewed complete Queen workbook snapshot."""
+import json, pathlib, collections
+root = pathlib.Path(__file__).parent
+scope = json.loads((root/'queen-product-scope.json').read_text(encoding='utf-8'))
+catalog = {p['productId']: p for p in scope['catalog']}
+shops = {'AIDAI':'愛戴','afternoon':'Afternun Lab','LeMu萊沐':"Le'Mu Lens",'OMOLENS':'OMO Lens','模範眼鏡':'MoreFine','鏡后':'鏡后 Lenses Queen'}
+offers = []
+for mode, data in scope['modes'].items():
+ for q in data['quotes']:
+  p = catalog[q[0]]
+  offers.append(dict(source=shops.get(q[2],q[2]),brand=p['brand'],product=q[7],salePrice=q[4],piecesPerBox=p['pieces'],boughtBoxes=q[5],giftBoxes=0,totalPieces=(p['pieces'] or 0)*q[5],unitPrice=q[4]/q[5],url=p['url'] if q[2]=='鏡后' else q[9],checkedAt='2026-09-23' if q[2]=='鏡后' else '2026-09-22',comparisonKey='queen-'+p['productId'],comparisonName=p['name'],rankingBasis='box',purchaseMode=mode,receivedBoxes=q[5],priceRank=q[3],modeStatuses=p['statuses'],unitLabel='件' if p['brand']=='氧視加' else '盒',note='；'.join(str(x) for x in [q[8],p['note'] if q[2]=='鏡后' else '', '同系列花色及限制請見原品名；未另扣會員／結帳折扣及運費'] if x)))
+brands = collections.defaultdict(set)
+for p in catalog.values(): brands[p['brand']].add(p['productId'])
+payload = dict(version='20260925-queen-complete-1',sourceDates=['2026-09-22','2026-09-23'],minimumBrandItems=3,catalog=list(catalog.values()),offers=offers,brands=[dict(name=b,aliases=[b],supplemental=True,itemCount=len(ids)) for b,ids in sorted(brands.items())])
 (root/'public/brand-rankings.json').write_text(json.dumps(payload,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-print(json.dumps({'offers':len(offers),'groups':len(keys),'brands':{b:len(k) for b,k in brands.items()}},ensure_ascii=False))
-
+print(f'{len(catalog)} products; {len(offers)} quotes')
